@@ -11,5 +11,9 @@
   "author": "",
   "devDependencies": {
     "parcel-bundler": "^1.12.4"
+  },
+  "dependencies": {
+    "csv": "^5.3.1",
+    "d3": "^5.15.0"
   }
 }
