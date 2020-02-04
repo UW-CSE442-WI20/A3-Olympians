@@ -43,13 +43,34 @@ svg.append("g")
   .call(yAxis);
 
 // Load in the data
-const csvFile = require('../olympic_with_drop.csv');
+const csvFile = require('../olympic_overall.csv');
 
 d3.csv(csvFile).then(function(data) {
   // data.sort(function(x, y) {
   //   return d3.ascending(x.NOC, y.NOC);
   // });
-  console.log(data);
+
+  // convert each value to its appropriate data type
+  data.forEach(function(d) {
+    d.ID = +d.ID;
+    d.Age = +d.Age;
+    d.Year = +d.Year;
+  });
+
+  // make the name the key
+  var entriesByName = d3.nest()
+    .key(function(d) { return d.Name; })
+    .entries(data);
+
+  // make the start year the key then name the secondary key
+  var entriesByStartThenName = d3.nest()
+    .key(function(d) { return d.Start; })
+    .key(function(d) { return d.Name; })
+    .entries(data);
+
+  console.log(entriesByName);
+  console.log(entriesByStartThenName);
+
   xScale.domain(data.map(xValue));
   // Render the data
   svg.selectAll('circle').data(data)
