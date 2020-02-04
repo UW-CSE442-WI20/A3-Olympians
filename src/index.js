@@ -43,7 +43,7 @@ svg.append("g")
   .call(yAxis);
 
 // Load in the data
-const csvFile = require('../olympic_with_drop.csv');
+const csvFile = require('../olympic_overall.csv');
 
 d3.csv(csvFile).then(function(data) {
   // data.sort(function(x, y) {
@@ -51,6 +51,16 @@ d3.csv(csvFile).then(function(data) {
   // });
   console.log(data);
   xScale.domain(data.map(xValue));
+  // Render the lines
+  svg.selectAll("line").data(data)
+    .enter()
+    .append("line")
+    .style("stroke", function(d) { return colorScale(d[colorColumn]); })
+    .style("stroke-width", 1)
+    .attr("x1", function(d) { return xScale(d[xColumn]); })
+    .attr("y1", function(d) { return yScale(d["Start"]); })
+    .attr("x2", function(d) { return xScale(d[xColumn]); })
+    .attr("y2", function(d) { return yScale(d["End"]); });
   // Render the data
   svg.selectAll('circle').data(data)
     .enter()
@@ -91,15 +101,4 @@ d3.csv(csvFile).then(function(data) {
     })
     .on("click", function(d) {
 		});
-
-  // Render the lines
-  // svg.selectAll("line").data(data)
-  //   .enter()
-  //   .append("line")
-  //   .style("stroke", "black")
-  //   .attr("x1", function(d) { return xScale(d[xColumn]); })
-  //   .attr("y1", function(d) { return yScale(d[yColumn]); })
-  //   .attr("x2", function(d) { return xScale(0); })
-  //   .attr("y2", function(d) { return yScale(0); });
-  //   console.log("lines!");
 });
