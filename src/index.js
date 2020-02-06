@@ -175,7 +175,6 @@ d3.csv(csvFile).then(function(data) {
     d.Age = +d.Age;
     d.Year = +d.Year;
   });
-  temp = data
 
   // make the name the key
   var entriesByName = d3.nest()
@@ -219,19 +218,44 @@ d3.csv(csvFile).then(function(data) {
   }
 
   updateData(0, entriesByNOC, entriesByName);
-  document.getElementById('select-NOC').addEventListener('change', function() {
+  activities = document.getElementById('select-NOC').addEventListener('change', function() {
+    var activities = document.getElementById('select-NOC');
+    var selectedOptions = activities.selectedOptions || [].filter.call(activities.options, option => option.selected);
+    var selectedValues = [].map.call(selectedOptions, option => option.value);
+    console.log(selectedValues);
+
     var currentNOCs = [];
-    if (this.value in currentNOCs) {
-      currentNOCs.pop(this.value);
+    var res = currentNOCs.filter(item1 =>
+      !selectedValues.some(item2 => (item2.id === item1.id && item2.name === item1.name)))
+
+
+    if (currentNOCs.length > selectedValues.length) {
+      currentNOCs.pop(res[0]);
     } else {
-      currentNOCs.push(this.value);
+      currentNOCs.push(res[0]);
     }
-    console.log("values", this.value);
-    console.log(currentNOCs);
+    console.log("current NOCs ", currentNOCs);
+    console.log("selected values ", selectedValues);
+    console.log("intersection: ", res);
+
     updateData(this.value, entriesByNOC, entriesByName);
     // update the current dots that we're displaying
     console.log('You selected: ', this.value);
   });
+
+  // activities.addEventListener("click", function() {
+  //   var currentNOCs = [];
+  //   if (this.value in currentNOCs) {
+  //     currentNOCs.pop(this.value);
+  //   } else {
+  //     currentNOCs.push(this.value);
+  //   }
+  //   console.log(values);
+  //   console.log(this);
+  //   console.log("values", this.value);
+  //   console.log(currentNOCs);
+  // });
+
 });
 
 
