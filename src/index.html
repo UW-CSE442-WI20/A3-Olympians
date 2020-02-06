@@ -6,7 +6,27 @@
     <link rel="stylesheet" type="text/css" href="./styles.css">
   </head>
   <body>
-    <h1>Olympians Through the Years</h1>
-    <svg width="1400" height="800"></svg>
+    <div class="grid-container">
+        <div class="grid-element header">
+          <h1>Olympians Through the Years</h1>
+        </div>
+        <div class="grid-element content">
+          <svg width="1200" height="800"></svg>
+        </div>
+        <div class="grid-element sidebar">
+          <div class="controls">
+            <p>
+              <label for="start"
+                style="display: inline-block; width: 240px; text-align: right">
+                startYear = <span id="start-value">…</span>
+              </label>
+              <input type="range" min="1896" max="2016" step="4" id="start">
+            </p>
+
+          </div>
+        </div>
+        <div class="grid-element footer"></div>
+      </div>
+
     <script src="./index.js"></script>
   </body>

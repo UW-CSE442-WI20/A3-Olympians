@@ -1,8 +1,60 @@
+body {
+  width: 80%;
+  margin: 0; padding: 0;
+  display: flex;
+  font-family: sans-serif; font-size: 75%;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "content content"
+    "sidebar sidebar"
+    "footer footer";
+  height: 600px;
+}
+
+.grid-element.header {
+  background-color: beige;
+  grid-area: header;
+}
+.grid-element.footer {
+  background-color: beige;
+  grid-area: footer;
+}
+.grid-element.content {
+  background-color: none;
+  grid-area: content;
+}
+.grid-element.sidebar {
+  background-color: none;
+  grid-area: sidebar;
+}
+
+.controls {
+  flex-basis: 200px;
+  padding: 0 5px;
+}
+
 h1 {
   color: blue;
   text-align: center;
 }
 
-circle:hover {
-  fill: orange;
+svg {
+  flex-basis: 100%;
+  min-width: 200px;
+}
+
+.axis {
+  fill: none;
+}
+
+.axis path {
+  stroke: none;
+}
+
+.axis line {
+  stroke: Gray;
 }

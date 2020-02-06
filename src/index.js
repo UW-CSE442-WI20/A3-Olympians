@@ -1,6 +1,6 @@
 var d3 = require("d3");
 
-var outerWidth = 1400;
+var outerWidth = 1200;
 var outerHeight = 800;
 var margin = { left: 60, top: 30, right: 30, bottom: 30 };
 var innerWidth = outerWidth - margin.left - margin.right;
@@ -9,10 +9,11 @@ var circleRadius = 3;
 var xColumn = "ID";
 var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete ID
+var startYear = 1896;
 
 //const xScale = d3.scaleLinear().domain([0, 135000]).range([margin["left"], innerWidth]);
 const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
-const yScale = d3.scaleTime().domain([1896, 2016]).range([margin["bottom"], innerHeight]);
+const yScale = d3.scaleTime().domain([startYear, 2016]).range([margin["bottom"], innerHeight]);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 // get the svg
@@ -24,23 +25,29 @@ const xValue = d => d.ID;
 
 //var xAxis = d3.axisBottom(xScale);
 var xAxis = d3.axisBottom(xScale)
-              .tickPadding(20)
-              .tickSize(-innerHeight);
+              .tickPadding(30);
+              //.tickSize(-innerHeight);
 var yAxis = d3.axisLeft(yScale)
               .tickValues([1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932,
                 1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980,
                 1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016])
-              .tickFormat(d3.format("Y"));  // d3.format("d") // gets rid of commas in the dates
+              .tickFormat(d3.format("Y"))  // d3.format("d") // gets rid of commas in the dates
+              .tickSize(-innerWidth);
 
 // add axis groups to svg
-svg.append("g")
-  .attr("class", "axis")
-  .attr("transform", "translate(0," + innerHeight + ")")
-  .call(xAxis);
-svg.append("g")
-  .attr("class", "axis")
-  .attr("transform", "translate(" + margin["left"] + ",0)")
-  .call(yAxis);
+var xAxisGroup = svg.append("g")
+                    .attr("class", "axis x")
+                    .attr("transform", "translate(0," + innerHeight + ")")
+                    .call(xAxis);
+var yAxisGroup = svg.append("g")
+                    .attr("class", "axis y")
+                    .attr("transform", "translate(" + margin["left"] + ",0)")
+                    .call(yAxis);
+
+// group for the visualization
+var chart = svg.append("g")
+               .attr("class", "chart")
+               .attr("transform", "translate(10,0)");
 
 // Load in the data
 const csvFile = require('../olympic_overall.csv');
@@ -68,12 +75,13 @@ d3.csv(csvFile).then(function(data) {
     .key(function(d) { return d.Name; })
     .entries(data);
 
+  xScale.domain(data.map(xValue));
+
   console.log(entriesByName);
   console.log(entriesByStartThenName);
 
-  xScale.domain(data.map(xValue));
   // Render the lines
-  svg.selectAll("line").data(data)
+  chart.selectAll("line").data(data)
     .enter()
     .append("line")
     .style("stroke", function(d) { return colorScale(d[colorColumn]); })
@@ -82,8 +90,17 @@ d3.csv(csvFile).then(function(data) {
     .attr("y1", function(d) { return yScale(d["Start"]); })
     .attr("x2", function(d) { return xScale(d[xColumn]); })
     .attr("y2", function(d) { return yScale(d["End"]); });
+
   // Render the data
-  svg.selectAll('circle').data(data)
+  // Sets circles attributes
+ // var circleAttrs = {
+ //     cx: function(d) { return xScale(d[xColumn]);},
+ //     cy: function(d) { return xScale(d[yColumn]); },
+ //     r: circleRadius,
+ //     fill: function(d) { return colorScale(d[colorColumn]); },
+ //     label: function(d) { return d.Name }
+ // };
+  chart.selectAll('circle').data(data)
     .enter()
     .append('circle')
     .attr("cx", function(d) { return xScale(d[xColumn]); })
@@ -91,11 +108,13 @@ d3.csv(csvFile).then(function(data) {
     .attr("r", circleRadius)
     .attr("fill", function(d) { return colorScale(d[colorColumn]); })
     .attr("label", function(d) { return d.Name })
+    //.attr(circleAttrs)
     .on("mouseover", function(d) {
       // circle gets bigger
       d3.select(this)
         .transition()
-        .attr("r", circleRadius + 3);
+        .attr("r", circleRadius + 3)
+        .attr("fill", "orange");
       //Get this circle's x/y values, then augment for the tooltip
 			var xPosition = parseFloat(d3.select(this).attr("cx"));
 			var yPosition = parseFloat(d3.select(this).attr("cy"));
@@ -116,10 +135,35 @@ d3.csv(csvFile).then(function(data) {
       // back to small circles
       d3.select(this)
         .transition()
-        .attr("r", circleRadius);
+        .attr("r", circleRadius)
+        .attr("fill", function(d) { return colorScale(d[colorColumn]); });
       //Remove the tooltip
       d3.select("#tooltip").remove();
     })
     .on("click", function(d) {
 		});
 });
+
+///////
+
+// // when the input range changes update the start year
+d3.select("#start").on("input", function() {
+  console.log(this.value);
+  update(+this.value);
+});
+
+// Initial starting year
+update(1896);
+
+// update the elements
+function update(start) {
+  // adjust the text on the range slider
+  d3.select("#start-value").text(start);
+  d3.select("#start").property("value", start);
+  startYear = start;
+  // update the Y-axis
+  yScale.domain([startYear, 2016]);
+  yAxisGroup.transition().call(yAxis);  // Update Y-Axis
+  // svg.selectAll("axis y")
+  //   .attr("fill", "blue");
+}
