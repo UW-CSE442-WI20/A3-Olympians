@@ -1,4 +1,5 @@
-var d3 = require("d3");
+const d3 = require("d3");
+const _ = require("underscore");
 
 var outerWidth = 1200;
 var outerHeight = 800;
@@ -53,9 +54,6 @@ var chart = svg.append("g")
 const csvFile = require('../olympic_overall.csv');
 
 d3.csv(csvFile).then(function(data) {
-  // data.sort(function(x, y) {
-  //   return d3.ascending(x.NOC, y.NOC);
-  // });
 
   // convert each value to its appropriate data type
   data.forEach(function(d) {
@@ -90,7 +88,6 @@ d3.csv(csvFile).then(function(data) {
     .attr("y1", function(d) { return yScale(d["Start"]); })
     .attr("x2", function(d) { return xScale(d[xColumn]); })
     .attr("y2", function(d) { return yScale(d["End"]); });
-
   // Render the data
   // Sets circles attributes
  // var circleAttrs = {
@@ -142,12 +139,24 @@ d3.csv(csvFile).then(function(data) {
       d3.select("#tooltip").remove();
     })
     .on("click", function(d) {
+      // get the data for the selected athlete
+      console.log(Object.values(d3.values(entriesByName)));
+      var athleteData = _.find(d3.values(entriesByName), function(item) {
+      // console.log("key: " + item.key);
+      // console.log("searching for: " + d.Name);
+      return item.key === d.Name;
+});
+console.log("result: " + athleteData.values);
+
+athleteData.values.forEach(function(element) {
+   console.log(element);
+});
+
 		});
 });
 
-///////
 
-// // when the input range changes update the start year
+// when the input range changes update the start year
 d3.select("#start").on("input", function() {
   console.log(this.value);
   update(+this.value);
@@ -163,8 +172,6 @@ function update(start) {
   d3.select("#start").property("value", start);
   startYear = start;
   // update the Y-axis
-  yScale.domain([startYear, 2016]);
+  yScale.domain([startYear, 2012]);
   yAxisGroup.transition().call(yAxis);  // Update Y-Axis
-  // svg.selectAll("axis y")
-  //   .attr("fill", "blue");
 }
