@@ -1,35 +1,40 @@
 const d3 = require("d3");
 const _ = require("underscore");
+//const timeSlider = require("./timeslider.js");
+import {slider} from './timeslider';
 
 var outerWidth = 1200;
 var outerHeight = 800;
+
 var margin = {
   left: 60,
   top: 30,
   right: 30,
   bottom: 30
 };
+
 var innerWidth = outerWidth - margin.left - margin.right;
 var innerHeight = outerHeight - margin.top - margin.bottom;
 var circleRadius = 3;
 var xColumn = "ID";
 var yColumn = "Year";
-var colorColumn = "NOC"; // color of circles based on athlete ID
+var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
+var endYear = 2016;
 
 //const xScale = d3.scaleLinear().domain([0, 135000]).range([margin["left"], innerWidth]);
 const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
-const yScale = d3.scaleTime().domain([startYear, 2016]).range([margin["bottom"], innerHeight]);
+const yScale = d3.scaleTime().domain([startYear, endYear]).range([margin["bottom"], innerHeight]);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 // get the svg
 var svg = d3.select('svg');
+//var svg = d3.select("#vis");
 // axes
 
 // for plotting points
 const xValue = d => d.ID;
 
-//var xAxis = d3.axisBottom(xScale);
 var xAxis = d3.axisBottom(xScale)
   .tickPadding(30);
 //.tickSize(-innerHeight);
@@ -51,6 +56,7 @@ var yAxisGroup = svg.append("g")
   .attr("transform", "translate(" + margin["left"] + ",0)")
   .call(yAxis);
 
+
 // group for the visualization
 var chart = svg.append("g")
   .attr("class", "chart")
@@ -62,11 +68,9 @@ var NOCs = [];
 const csvFile = require('../olympic_overall.csv');
 
 function updateData(idx, NOCs, entriesByName) {
-  // do something here
   console.log(NOCs);
   console.log(NOCs[idx]);
   // get the data of the NOC
-
   console.log(NOCs[idx].values);
   // Render the lines
   chart.selectAll("line").remove();
@@ -90,15 +94,6 @@ function updateData(idx, NOCs, entriesByName) {
     .attr("y2", function(d) {
       return yScale(d["End"]);
     });
-  // Render the data
-  // Sets circles attributes
-  // var circleAttrs = {
-  //     cx: function(d) { return xScale(d[xColumn]);},
-  //     cy: function(d) { return xScale(d[yColumn]); },
-  //     r: circleRadius,
-  //     fill: function(d) { return colorScale(d[colorColumn]); },
-  //     label: function(d) { return d.Name }
-  // };
   chart.selectAll('circle').data(NOCs[idx].values)
     .enter()
     .append('circle')
@@ -144,6 +139,7 @@ function updateData(idx, NOCs, entriesByName) {
       d3.select(this)
         .transition()
         .attr("r", circleRadius)
+        .attr("fill", function(d) { return colorScale(d[colorColumn]); })
         .attr("fill", function(d) {
           return colorScale(d[colorColumn]);
         });
@@ -168,7 +164,6 @@ function updateData(idx, NOCs, entriesByName) {
 
 d3.csv(csvFile).then(function(data) {
   console.log(data);
-
   // convert each value to its appropriate data type
   data.forEach(function(d) {
     d.ID = +d.ID;
@@ -183,14 +178,14 @@ d3.csv(csvFile).then(function(data) {
     })
     .entries(data);
 
-  // make the name the key
+  // make the NOC the key
   var entriesByNOC = d3.nest()
     .key(function(d) {
       return d.NOC;
     })
     .entries(data);
 
-  // make the start year the key then name the secondary key
+  // make the Start Year the key then Name the secondary key
   var entriesByStartThenName = d3.nest()
     .key(function(d) {
       return d.Start;
@@ -213,7 +208,7 @@ d3.csv(csvFile).then(function(data) {
   }
 
   var select = document.getElementById("select-NOC");
-  for (index in NOCs) {
+  for (var index in NOCs) {
     select.options[select.options.length] = new Option(NOCs[index], index);
   }
 
@@ -258,23 +253,38 @@ d3.csv(csvFile).then(function(data) {
 
 });
 
+// RENDER THE TIME SLIDER
+var mySlider = slider(1896, 2016);
 
-// when the input range changes update the start year
-d3.select("#start").on("input", function() {
-  console.log(this.value);
-  update(+this.value);
+// when the input range changes update the start and end years
+d3.select('#eventHandler').on('change', function() {
+  console.log("changed");
+  updateTimeSlider(mySlider.getRange());
 });
 
-// Initial starting year
-update(1896);
+// Initial start and end years
+updateTimeSlider([1896, 2016]);
 
-// update the elements
-function update(start) {
-  // adjust the text on the range slider
-  d3.select("#start-value").text(start);
-  d3.select("#start").property("value", start);
-  startYear = start;
+// update the chart elements
+function updateTimeSlider(range) {
+  startYear = range[0];
+  endYear = range[1];
   // update the Y-axis
-  yScale.domain([startYear, 2012]);
-  yAxisGroup.transition().call(yAxis); // Update Y-Axis
-}
+  yScale.domain([startYear, endYear]);
+  console.log("start: " + startYear);
+  console.log("end: " + endYear);
+  yAxisGroup.transition().call(yAxis);
+
+  // update lines
+  var l = chart.selectAll("line")
+               .transition()
+               .attr("x1", function(d) { return xScale(d[xColumn]); })
+               .attr("y1", function(d) { return yScale(d["Start"]); })
+               .attr("x2", function(d) { return xScale(d[xColumn]); })
+               .attr("y2", function(d) { return yScale(d["End"]); });
+  // update circles
+  var c = chart.selectAll("circle")
+               .transition()
+               .attr("cx", function(d) { return xScale(d[xColumn]); })
+               .attr("cy", function(d) { return yScale(d[yColumn]); });
+  }
