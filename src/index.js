@@ -129,6 +129,7 @@ d3.csv(csvFile).then(function(data) {
 				 .attr("font-size", "11px")
 				 .attr("font-weight", "bold")
 				 .attr("fill", "black")
+         .style("pointer-events", "none")
 				 .text(d.Name);
     })
     .on("mouseout", function() {
