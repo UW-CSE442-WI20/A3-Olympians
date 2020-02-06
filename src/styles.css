@@ -12,12 +12,13 @@ body {
     "content content"
     "sidebar sidebar"
     "footer footer";
-  height: 600px;
+  /*height: 600px;**/
 }
 
 .grid-element.header {
   background-color: beige;
   grid-area: header;
+  padding: 300;
 }
 .grid-element.footer {
   background-color: beige;
@@ -26,6 +27,7 @@ body {
 .grid-element.content {
   background-color: none;
   grid-area: content;
+  display: flex;
 }
 .grid-element.sidebar {
   background-color: none;
@@ -36,6 +38,10 @@ body {
   flex-basis: 200px;
   padding: 0 5px;
 }
+
+/* #eventHandler {
+  display: none;
+} */
 
 h1 {
   color: blue;
