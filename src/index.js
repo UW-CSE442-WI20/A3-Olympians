@@ -224,15 +224,20 @@ function initializeDataStructures(data) {
     })
     .entries(data);
 
-    // find the rows
-    medalCounts = _.countBy(medalsOnly, function (item) {
-      return item.Name;
-    });
-  
-    // find the maximum number of medals someone has
-    maxMedals = _.max(medalCounts, function (item) {
-      return item;
-    });
+    
+  // get only rows with medal
+  const medalsOnly = _.filter(data, function (item) {
+    return item.Medal.length > 0;
+  });
+  // count all the medals for each person
+  medalCounts = _.countBy(medalsOnly, function (item) {
+    return item.Name;
+  });
+
+  // find the maximum number of medals someone has
+  maxMedals = _.max(medalCounts, function (item) {
+    return item;
+  });
 }
 
 
@@ -272,13 +277,6 @@ function setupNOCFiltering(data) {
 
 // function to setup Medal Filtering
 function setupMedalFiltering(data) {
-
-  // get only rows with medal
-  const medalsOnly = _.filter(data, function (item) {
-    return item.Medal.length > 0;
-  });
-  // count all the medals for each person
-
   // populate dropdown with range of medals
   var medalsDD = document.getElementById("numMedals");
   for (var i = 1; i <= maxMedals; i++) {
