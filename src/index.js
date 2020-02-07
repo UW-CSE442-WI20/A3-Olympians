@@ -67,15 +67,10 @@ var NOCs = [];
 // Load in the data
 const csvFile = require('../olympic_overall.csv');
 
-function updateData(idx, NOCs, entriesByName) {
-  console.log(NOCs);
-  console.log(NOCs[idx]);
-  // get the data of the NOC
-  console.log(NOCs[idx].values);
-  // Render the lines
+function redraw(inputData) {
   chart.selectAll("line").remove();
   chart.selectAll("circle").remove();
-  chart.selectAll("line").data(NOCs[idx].values)
+  chart.selectAll("line").data(inputData)
     .enter()
     .append("line")
     .style("stroke", function(d) {
@@ -94,7 +89,7 @@ function updateData(idx, NOCs, entriesByName) {
     .attr("y2", function(d) {
       return yScale(d["End"]);
     });
-  chart.selectAll('circle').data(NOCs[idx].values)
+  chart.selectAll('circle').data(inputData)
     .enter()
     .append('circle')
     .attr("cx", function(d) {
@@ -195,6 +190,15 @@ d3.csv(csvFile).then(function(data) {
     })
     .entries(data);
 
+  // get only rows with medal
+  const medalsOnly = _.filter(data, function(item) {
+    return item.Medal.length > 0;
+  });
+  // count all the medals for each person
+  const medalCounts = _.countBy(medalsOnly, function(item) {
+    return item.Name;
+  });
+
   xScale.domain(data.map(xValue));
 
   console.log(entriesByName);
@@ -212,7 +216,7 @@ d3.csv(csvFile).then(function(data) {
     select.options[select.options.length] = new Option(NOCs[index], index);
   }
 
-  updateData(0, entriesByNOC, entriesByName);
+  redraw(entriesByNOC[0].values);
   document.getElementById('select-NOC').addEventListener('change', function() {
     var currentNOCs = [];
     if (this.value in currentNOCs) {
@@ -222,11 +226,50 @@ d3.csv(csvFile).then(function(data) {
     }
     console.log("values", this.value);
     console.log(currentNOCs);
-    updateData(this.value, entriesByNOC, entriesByName);
+  
+    var currPeople = filterByMedal(data, medalCounts, document.getElementById('numMedals').value);
+    currPeople = _.filter(currPeople, (item) => {
+      return item.NOC === NOCs[this.value];
+    });
+    redraw(currPeople);
     // update the current dots that we're displaying
     console.log('You selected: ', this.value);
   });
+
+  // find the maximum number of medals someone has
+  const maxMedals = _.max(medalCounts, function(item) {
+    return item;
+  });
+  // populate dropdown with range of medals
+  var medalsDD = document.getElementById("numMedals");
+  for (var i = 1; i <= maxMedals; i++) {
+    medalsDD.options[medalsDD.options.length] = new Option(i, i);  
+  }
+
+  d3.select("#numMedals")
+  .on("input", function() {
+    const currPeople = filterByMedal(entriesByNOC[document.getElementById('select-NOC').value].values, medalCounts, this.value);
+    redraw(currPeople);
+  });
 });
+
+// function that returns the dataset with only the rows
+// containing the people with more than nMedals medals
+// parameters: data - the full dataset, 
+// medalCounts - count of all the medals for each person
+// nMedals - current number of medals
+function filterByMedal(data, medalCounts, nMedals) {
+  let currMedals = [];
+  for (var person in medalCounts) {
+    if (medalCounts[person] >= nMedals) {
+      currMedals.push(person);
+    }
+  }
+  const currPeople = _.filter(data, (item) => {
+    return _.indexOf(currMedals, item.Name) >= 0;
+  });
+  return currPeople;
+}
 
 // RENDER THE TIME SLIDER
 var mySlider = slider(1896, 2016);

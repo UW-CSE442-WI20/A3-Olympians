@@ -35,8 +35,16 @@ body {
 }
 
 .controls {
-  flex-basis: 200px;
+  display: inline-flex;
   padding: 0 5px;
+}
+
+.dropdown {
+	padding: 0 50px;
+}
+
+.dropdown select{
+	width: fill;
 }
 
 /* #eventHandler {
