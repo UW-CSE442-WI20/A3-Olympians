@@ -1,7 +1,13 @@
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// DATA INITIALIZATION
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
 const d3 = require("d3");
 const _ = require("underscore");
 //const timeSlider = require("./timeslider.js");
-import {slider} from './timeslider';
+import { slider } from './timeslider';
 
 var outerWidth = 1200;
 var outerHeight = 800;
@@ -21,6 +27,29 @@ var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
 var endYear = 2016;
+
+const csvFile = require('../olympic_overall.csv');
+
+var medalCounts;
+var maxMedals;
+// data structures to be loaded in
+
+// make the Name the key
+var entriesByName;
+// make the NOC the key
+var entriesByNOC;
+// make the Start Year the key then Name the secondary key
+var entriesByStartThenName;
+// lists all NOCs
+var NOCs = [];
+
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// HTML SETUP
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
 
 //const xScale = d3.scaleLinear().domain([0, 135000]).range([margin["left"], innerWidth]);
 const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
@@ -62,51 +91,55 @@ var chart = svg.append("g")
   .attr("class", "chart")
   .attr("transform", "translate(10,0)");
 
-var NOCs = [];
 
-// Load in the data
-const csvFile = require('../olympic_overall.csv');
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// Helper functions
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 
-function redraw(inputData, entriesByName) {
+// function to draw lines and points given inputData
+// Note: currently does not support .exit() functionality
+function redraw(inputData) {
   chart.selectAll("line").remove();
   chart.selectAll("circle").remove();
   chart.selectAll("line").data(inputData)
     .enter()
     .append("line")
-    .style("stroke", function(d) {
+    .style("stroke", function (d) {
       return colorScale(d[colorColumn]);
     })
     .style("stroke-width", 1)
-    .attr("x1", function(d) {
+    .attr("x1", function (d) {
       return xScale(d[xColumn]);
     })
-    .attr("y1", function(d) {
+    .attr("y1", function (d) {
       return yScale(d["Start"]);
     })
-    .attr("x2", function(d) {
+    .attr("x2", function (d) {
       return xScale(d[xColumn]);
     })
-    .attr("y2", function(d) {
+    .attr("y2", function (d) {
       return yScale(d["End"]);
     });
   chart.selectAll('circle').data(inputData)
     .enter()
     .append('circle')
-    .attr("cx", function(d) {
+    .attr("cx", function (d) {
       return xScale(d[xColumn]);
     })
-    .attr("cy", function(d) {
+    .attr("cy", function (d) {
       return yScale(d[yColumn]);
     })
     .attr("r", circleRadius)
-    .attr("fill", function(d) {
+    .attr("fill", function (d) {
       return colorScale(d[colorColumn]);
     })
-    .attr("label", function(d) {
+    .attr("label", function (d) {
       return d.Name
     })
     //.attr(circleAttrs)
-    .on("mouseover", function(d) {
+    .on("mouseover", function (d) {
       // circle gets bigger
       d3.select(this)
         .transition()
@@ -129,81 +162,81 @@ function redraw(inputData, entriesByName) {
         .style("pointer-events", "none")
         .text(d.Name);
     })
-    .on("mouseout", function() {
+    .on("mouseout", function () {
       // back to small circles
       d3.select(this)
         .transition()
         .attr("r", circleRadius)
-        .attr("fill", function(d) { return colorScale(d[colorColumn]); })
-        .attr("fill", function(d) {
+        .attr("fill", function (d) { return colorScale(d[colorColumn]); })
+        .attr("fill", function (d) {
           return colorScale(d[colorColumn]);
         });
       //Remove the tooltip
       d3.select("#tooltip").remove();
     })
-    .on("click", function(d) {
+    .on("click", function (d) {
       // get the data for the selected athlete
       console.log(Object.values(d3.values(entriesByName)));
-      var athleteData = _.find(d3.values(entriesByName), function(item) {
+      var athleteData = _.find(d3.values(entriesByName), function (item) {
         // console.log("key: " + item.key);
         // console.log("searching for: " + d.Name);
         return item.key === d.Name;
       });
       console.log("result: " + athleteData.values);
 
-      athleteData.values.forEach(function(element) {
+      athleteData.values.forEach(function (element) {
         console.log(element);
       });
     });
 }
 
-d3.csv(csvFile).then(function(data) {
+// function to set up the nested data structures
+function initializeDataStructures(data) {
   console.log(data);
   // convert each value to its appropriate data type
-  data.forEach(function(d) {
+  data.forEach(function (d) {
     d.ID = +d.ID;
     d.Age = +d.Age;
     d.Year = +d.Year;
   });
 
   // make the name the key
-  var entriesByName = d3.nest()
-    .key(function(d) {
+  entriesByName = d3.nest()
+    .key(function (d) {
       return d.Name;
     })
     .entries(data);
 
   // make the NOC the key
-  var entriesByNOC = d3.nest()
-    .key(function(d) {
+  entriesByNOC = d3.nest()
+    .key(function (d) {
       return d.NOC;
     })
     .entries(data);
 
   // make the Start Year the key then Name the secondary key
-  var entriesByStartThenName = d3.nest()
-    .key(function(d) {
+  entriesByStartThenName = d3.nest()
+    .key(function (d) {
       return d.Start;
     })
-    .key(function(d) {
+    .key(function (d) {
       return d.Name;
     })
     .entries(data);
 
-  // get only rows with medal
-  const medalsOnly = _.filter(data, function(item) {
-    return item.Medal.length > 0;
-  });
-  // count all the medals for each person
-  const medalCounts = _.countBy(medalsOnly, function(item) {
-    return item.Name;
-  });
+    // find the rows
+    medalCounts = _.countBy(medalsOnly, function (item) {
+      return item.Name;
+    });
+  
+    // find the maximum number of medals someone has
+    maxMedals = _.max(medalCounts, function (item) {
+      return item;
+    });
+}
 
-  xScale.domain(data.map(xValue));
 
-  console.log(entriesByName);
-  console.log(entriesByStartThenName);
-  console.log(entriesByNOC);
+function setupNOCFiltering(data) {
 
   for (var key in entriesByNOC) {
     if (!(entriesByNOC[key] in NOCs)) {
@@ -216,8 +249,8 @@ d3.csv(csvFile).then(function(data) {
     select.options[select.options.length] = new Option(NOCs[index], index);
   }
 
-  redraw(entriesByNOC[0].values, entriesByName);
-  document.getElementById('select-NOC').addEventListener('change', function() {
+  redraw(entriesByNOC[0].values);
+  document.getElementById('select-NOC').addEventListener('change', function () {
     var currentNOCs = [];
     if (this.value in currentNOCs) {
       currentNOCs.pop(this.value);
@@ -226,32 +259,38 @@ d3.csv(csvFile).then(function(data) {
     }
     console.log("values", this.value);
     console.log(currentNOCs);
-  
+
     var currPeople = filterByMedal(data, medalCounts, document.getElementById('numMedals').value);
     currPeople = _.filter(currPeople, (item) => {
       return item.NOC === NOCs[this.value];
     });
-    redraw(currPeople, entriesByName);
+    redraw(currPeople);
     // update the current dots that we're displaying
     console.log('You selected: ', this.value);
   });
+}
 
-  // find the maximum number of medals someone has
-  const maxMedals = _.max(medalCounts, function(item) {
-    return item;
+// function to setup Medal Filtering
+function setupMedalFiltering(data) {
+
+  // get only rows with medal
+  const medalsOnly = _.filter(data, function (item) {
+    return item.Medal.length > 0;
   });
+  // count all the medals for each person
+
   // populate dropdown with range of medals
   var medalsDD = document.getElementById("numMedals");
   for (var i = 1; i <= maxMedals; i++) {
-    medalsDD.options[medalsDD.options.length] = new Option(i, i);  
+    medalsDD.options[medalsDD.options.length] = new Option(i, i);
   }
 
   d3.select("#numMedals")
-  .on("input", function() {
-    const currPeople = filterByMedal(entriesByNOC[document.getElementById('select-NOC').value].values, medalCounts, this.value);
-    redraw(currPeople, entriesByName);
-  });
-});
+    .on("input", function () {
+      const currPeople = filterByMedal(entriesByNOC[document.getElementById('select-NOC').value].values, medalCounts, this.value);
+      redraw(currPeople);
+    });
+}
 
 // function that returns the dataset with only the rows
 // containing the people with more than nMedals medals
@@ -271,18 +310,6 @@ function filterByMedal(data, medalCounts, nMedals) {
   return currPeople;
 }
 
-// RENDER THE TIME SLIDER
-var mySlider = slider(1896, 2016);
-
-// when the input range changes update the start and end years
-d3.select('#eventHandler').on('change', function() {
-  console.log("changed");
-  updateTimeSlider(mySlider.getRange());
-});
-
-// Initial start and end years
-updateTimeSlider([1896, 2016]);
-
 // update the chart elements
 function updateTimeSlider(range) {
   startYear = range[0];
@@ -295,14 +322,58 @@ function updateTimeSlider(range) {
 
   // update lines
   var l = chart.selectAll("line")
-               .transition()
-               .attr("x1", function(d) { return xScale(d[xColumn]); })
-               .attr("y1", function(d) { return yScale(d["Start"]); })
-               .attr("x2", function(d) { return xScale(d[xColumn]); })
-               .attr("y2", function(d) { return yScale(d["End"]); });
+    .transition()
+    .attr("x1", function (d) { return xScale(d[xColumn]); })
+    .attr("y1", function (d) { return yScale(d["Start"]); })
+    .attr("x2", function (d) { return xScale(d[xColumn]); })
+    .attr("y2", function (d) { return yScale(d["End"]); });
   // update circles
   var c = chart.selectAll("circle")
-               .transition()
-               .attr("cx", function(d) { return xScale(d[xColumn]); })
-               .attr("cy", function(d) { return yScale(d[yColumn]); });
-  }
+    .transition()
+    .attr("cx", function (d) { return xScale(d[xColumn]); })
+    .attr("cy", function (d) { return yScale(d[yColumn]); });
+}
+
+
+// function to place all setup done for filtering options
+function initializeOptions(data) {
+
+  console.log(entriesByName);
+  console.log(entriesByStartThenName);
+  console.log(entriesByNOC);
+
+  // Bin: For now, setupMedalFiltering has to be called before setupNOCFiltering
+  // due to dependencies. 
+  // TODO: Bin fix this
+  setupMedalFiltering(data);
+
+  setupNOCFiltering(data);
+}
+
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+// MAIN
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+
+
+d3.csv(csvFile).then(function (data) {
+  // create the nested data structures
+  initializeDataStructures(data);
+  xScale.domain(data.map(xValue));
+  // initialize/create all the dropdowns/filters that will be shown in the view 
+  initializeOptions(data);
+});
+
+
+// RENDER THE TIME SLIDER
+var mySlider = slider(1896, 2016);
+
+// when the input range changes update the start and end years
+d3.select('#eventHandler').on('change', function () {
+  console.log("changed");
+  updateTimeSlider(mySlider.getRange());
+});
+
+// Initial start and end years
+updateTimeSlider([1896, 2016]);
