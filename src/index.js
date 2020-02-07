@@ -67,7 +67,7 @@ var NOCs = [];
 // Load in the data
 const csvFile = require('../olympic_overall.csv');
 
-function redraw(inputData) {
+function redraw(inputData, entriesByName) {
   chart.selectAll("line").remove();
   chart.selectAll("circle").remove();
   chart.selectAll("line").data(inputData)
@@ -216,7 +216,7 @@ d3.csv(csvFile).then(function(data) {
     select.options[select.options.length] = new Option(NOCs[index], index);
   }
 
-  redraw(entriesByNOC[0].values);
+  redraw(entriesByNOC[0].values, entriesByName);
   document.getElementById('select-NOC').addEventListener('change', function() {
     var currentNOCs = [];
     if (this.value in currentNOCs) {
@@ -231,7 +231,7 @@ d3.csv(csvFile).then(function(data) {
     currPeople = _.filter(currPeople, (item) => {
       return item.NOC === NOCs[this.value];
     });
-    redraw(currPeople);
+    redraw(currPeople, entriesByName);
     // update the current dots that we're displaying
     console.log('You selected: ', this.value);
   });
@@ -249,7 +249,7 @@ d3.csv(csvFile).then(function(data) {
   d3.select("#numMedals")
   .on("input", function() {
     const currPeople = filterByMedal(entriesByNOC[document.getElementById('select-NOC').value].values, medalCounts, this.value);
-    redraw(currPeople);
+    redraw(currPeople, entriesByName);
   });
 });
 
