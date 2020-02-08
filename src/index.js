@@ -1,8 +1,12 @@
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// DATA INITIALIZATION
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
 const d3 = require("d3");
 const _ = require("underscore");
-import {
-  slider
-} from './timeslider'
+import { slider } from './timeslider'
 
 var outerWidth = 1200;
 var outerHeight = 800;
@@ -21,6 +25,29 @@ var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
 var endYear = 2016;
 var currentNOCs = [];
+
+const csvFile = require('../olympic_overall.csv');
+
+var medalCounts;
+var maxMedals;
+// data structures to be loaded in
+
+// make the Name the key
+var entriesByName;
+// make the NOC the key
+var entriesByNOC;
+// make the Start Year the key then Name the secondary key
+var entriesByStartThenName;
+// lists all NOCs
+var NOCs = [];
+
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// HTML SETUP
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
 
 //const xScale = d3.scaleLinear().domain([0, 135000]).range([margin["left"], innerWidth]);
 const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
@@ -61,67 +88,58 @@ var chart = svg.append("g")
   .attr("class", "chart")
   .attr("transform", "translate(10,0)");
 
-var NOCs = [];
 
-// Load in the data
-const csvFile = require('../olympic_overall.csv');
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// Helper functions
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 
-function updateData(data, NOCs, entriesByName) {
-  console.log("updating");
-  // do something here
-  // console.log(NOCs);
-  // console.log(NOCs[idx]);
-  // get the data of the NOC
-
-  //console.log("values", NOCs[idx].values);
-  // Render the lines
+// function to draw lines and points given inputData
+// Note: currently does not support .exit() functionality
+function redraw(inputData) {
   // chart.selectAll("line").remove();
   // chart.selectAll("circle").remove();
-
-  console.log("data values:", data);
-  chart.append("g").selectAll("line").data(NOCs[data].values)
+  console.log("redrawing:", inputData);
+  chart.append("g").selectAll("line").data(inputData.values)
     .enter()
     .append("line")
-    .attr("id", "l" + data)
-    .style("stroke", function(d) {
-      // console.log("value of d:", d);
-      // console.log(d[colorColumn]);
+    .attr("id", "l" + inputData.key)
+    .style("stroke", function (d) {
       return colorScale(d[colorColumn]);
     })
     .style("stroke-width", 1)
-    .attr("x1", function(d) {
-      // console.log("d=", d);
+    .attr("x1", function (d) {
       return xScale(d[xColumn]);
     })
-    .attr("y1", function(d) {
+    .attr("y1", function (d) {
       return yScale(d["Start"]);
     })
-    .attr("x2", function(d) {
+    .attr("x2", function (d) {
       return xScale(d[xColumn]);
     })
-    .attr("y2", function(d) {
+    .attr("y2", function (d) {
       return yScale(d["End"]);
     });
-
-  chart.append("g").selectAll('circle').data(NOCs[data].values)
+  chart.append("g").selectAll('circle').data(inputData.values)
     .enter()
-    .append("circle")
-    .attr("id", "c" + data)
-    .attr("cx", function(d) {
+    .append('circle')
+    .attr("id", "c" + inputData.key)
+    .attr("cx", function (d) {
       return xScale(d[xColumn]);
     })
-    .attr("cy", function(d) {
+    .attr("cy", function (d) {
       return yScale(d[yColumn]);
     })
     .attr("r", circleRadius)
-    .attr("fill", function(d) {
+    .attr("fill", function (d) {
       return colorScale(d[colorColumn]);
     })
-    .attr("label", function(d) {
+    .attr("label", function (d) {
       return d.Name
     })
     //.attr(circleAttrs)
-    .on("mouseover", function(d) {
+    .on("mouseover", function (d) {
       // circle gets bigger
       d3.select(this)
         .transition()
@@ -144,7 +162,7 @@ function updateData(data, NOCs, entriesByName) {
         .style("pointer-events", "none")
         .text(d.Name);
     })
-    .on("mouseout", function() {
+    .on("mouseout", function () {
       // back to small circles
       d3.select(this)
         .transition()
@@ -155,62 +173,75 @@ function updateData(data, NOCs, entriesByName) {
       //Remove the tooltip
       d3.select("#tooltip").remove();
     })
-    .on("click", function(d) {
+    .on("click", function (d) {
       // get the data for the selected athlete
       console.log(Object.values(d3.values(entriesByName)));
-      var athleteData = _.find(d3.values(entriesByName), function(item) {
+      var athleteData = _.find(d3.values(entriesByName), function (item) {
         // console.log("key: " + item.key);
         // console.log("searching for: " + d.Name);
         return item.key === d.Name;
       });
       console.log("result: " + athleteData.values);
 
-      athleteData.values.forEach(function(element) {
+      athleteData.values.forEach(function (element) {
         console.log(element);
       });
 
     });
 }
 
-d3.csv(csvFile).then(function(data) {
-  //console.log(data);
-
+// function to set up the nested data structures
+function initializeDataStructures(data) {
+  console.log(data);
   // convert each value to its appropriate data type
-  data.forEach(function(d) {
+  data.forEach(function (d) {
     d.ID = +d.ID;
     d.Age = +d.Age;
     d.Year = +d.Year;
   });
 
   // make the name the key
-  var entriesByName = d3.nest()
-    .key(function(d) {
+  entriesByName = d3.nest()
+    .key(function (d) {
       return d.Name;
     })
     .entries(data);
 
-  // make the name the key
-  var entriesByNOC = d3.nest()
-    .key(function(d) {
+  // make the NOC the key
+  entriesByNOC = d3.nest()
+    .key(function (d) {
       return d.NOC;
     })
     .entries(data);
 
-  // make the start year the key then name the secondary key
-  var entriesByStartThenName = d3.nest()
-    .key(function(d) {
+  // make the Start Year the key then Name the secondary key
+  entriesByStartThenName = d3.nest()
+    .key(function (d) {
       return d.Start;
     })
-    .key(function(d) {
+    .key(function (d) {
       return d.Name;
     })
     .entries(data);
 
-  xScale.domain(data.map(xValue));
 
-  console.log(entriesByName);
-  console.log(entriesByStartThenName);
-  console.log(entriesByNOC);
+  // get only rows with medal
+  const medalsOnly = _.filter(data, function (item) {
+    return item.Medal.length > 0;
+  });
+  // count all the medals for each person
+  medalCounts = _.countBy(medalsOnly, function (item) {
+    return item.Name;
+  });
+
+  // find the maximum number of medals someone has
+  maxMedals = _.max(medalCounts, function (item) {
+    return item;
+  });
+}
+
+
+function setupNOCFiltering(data) {
 
   for (var key in entriesByNOC) {
     if (!(entriesByNOC[key] in NOCs)) {
@@ -223,49 +254,79 @@ d3.csv(csvFile).then(function(data) {
     select.options[select.options.length] = new Option(NOCs[index], index);
   }
 
-  //updateData(0, entriesByNOC, entriesByName);
   document.getElementById('select-NOC').addEventListener('change', function() {
     var activities = document.getElementById('select-NOC');
     var selectedOptions = activities.selectedOptions || [].filter.call(activities.options, option => option.selected);
     var selectedValues = [].map.call(selectedOptions, option => option.value);
-    console.log(selectedValues);
 
     //saving this stuff
     if (selectedValues.length > currentNOCs.length) {
       // we added a value so the current NOCs have to be updated
       var intersect = _.difference(selectedValues, currentNOCs);
-      console.log("first intersection: ", intersect);
       currentNOCs.push(intersect[0]);
-      updateData(intersect[0], entriesByNOC, entriesByName);
+      redraw(entriesByNOC[intersect[0]]);
       // add some line
+    } else if (selectedValues.length == currentNOCs.length) {
+      removeData(entriesByNOC[currentNOCs[0]].key);
+      redraw(entriesByNOC[this.value]);
+      currentNOCs = [];
+      currentNOCs.push(this.value);
     } else {
       // we removed a value so current NOCs have to be updated
       var intersect = _.difference(currentNOCs, selectedValues);
-      console.log("second intersection: ", intersect);
       currentNOCs.pop(intersect[0]);
-      removeData(intersect[0]);
+      removeData(entriesByNOC[intersect[0]].key);
     }
+
+    var currPeople = filterByMedal(data, medalCounts, document.getElementById('numMedals').value);
+    currPeople = _.filter(currPeople, (item) => {
+      return item.NOC === NOCs[this.value];
+    });
+    redraw(currPeople);
+    // update the current dots that we're displaying
     console.log('You selected: ', this.value);
   });
-});
+}
 
+// lets us remove the circles and lines that we don't need
 function removeData(value) {
   svg.selectAll("#c" + value).remove();
   svg.selectAll("#l" + value).remove();
 }
 
-// RENDER THE TIME SLIDER
-var mySlider = slider(1896, 2016);
+// function to setup Medal Filtering
+function setupMedalFiltering(data) {
+  // populate dropdown with range of medals
+  var medalsDD = document.getElementById("numMedals");
+  for (var i = 1; i <= maxMedals; i++) {
+    medalsDD.options[medalsDD.options.length] = new Option(i, i);
+  }
 
+  d3.select("#numMedals")
+    .on("input", function () {
+      const currPeople = filterByMedal(entriesByNOC[document.getElementById('select-NOC').value].values, medalCounts, this.value);
+      removeData(currPeople.key);
+      redraw(currPeople);
+    });
+}
 
-// when the input range changes update the start year
-d3.select("#eventHandler").on("change", function() {
-  console.log("changed");
-  updateTimeSlider(mySlider.getRange());
-});
-
-// Initial starting year
-updateTimeSlider([1896, 2016]);
+// function that returns the dataset with only the rows
+// containing the people with more than nMedals medals
+// parameters: data - the full dataset,
+// medalCounts - count of all the medals for each person
+// nMedals - current number of medals
+function filterByMedal(data, medalCounts, nMedals) {
+  let currMedals = [];
+  for (var person in medalCounts) {
+    if (medalCounts[person] >= nMedals) {
+      currMedals.push(person);
+    }
+  }
+  const currPeople = _.filter(data, (item) => {
+    return _.indexOf(currMedals, item.Name) >= 0;
+  });
+  return currPeople;
+}
 
 // update the elements
 function updateTimeSlider(range) {
@@ -280,25 +341,57 @@ function updateTimeSlider(range) {
   // update lines
   var l = chart.selectAll("line")
     .transition()
-    .attr("x1", function(d) {
-      return xScale(d[xColumn]);
-    })
-    .attr("y1", function(d) {
-      return yScale(d["Start"]);
-    })
-    .attr("x2", function(d) {
-      return xScale(d[xColumn]);
-    })
-    .attr("y2", function(d) {
-      return yScale(d["End"]);
-    });
+    .attr("x1", function (d) { return xScale(d[xColumn]); })
+    .attr("y1", function (d) { return yScale(d["Start"]); })
+    .attr("x2", function (d) { return xScale(d[xColumn]); })
+    .attr("y2", function (d) { return yScale(d["End"]); });
   // update circles
   var c = chart.selectAll("circle")
     .transition()
-    .attr("cx", function(d) {
-      return xScale(d[xColumn]);
-    })
-    .attr("cy", function(d) {
-      return yScale(d[yColumn]);
-    });
+    .attr("cx", function (d) { return xScale(d[xColumn]); })
+    .attr("cy", function (d) { return yScale(d[yColumn]); });
 }
+
+
+// function to place all setup done for filtering options
+function initializeOptions(data) {
+
+  console.log(entriesByName);
+  console.log(entriesByStartThenName);
+  console.log(entriesByNOC);
+
+  // Bin: For now, setupMedalFiltering has to be called before setupNOCFiltering
+  // due to dependencies.
+  // TODO: Bin fix this
+  setupMedalFiltering(data);
+
+  setupNOCFiltering(data);
+}
+
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+// MAIN
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+
+
+d3.csv(csvFile).then(function (data) {
+  // create the nested data structures
+  initializeDataStructures(data);
+  xScale.domain(data.map(xValue));
+  // initialize/create all the dropdowns/filters that will be shown in the view
+  initializeOptions(data);
+});
+
+
+// RENDER THE TIME SLIDER
+var mySlider = slider(1896, 2016);
+
+// when the input range changes update the start and end years
+d3.select('#eventHandler').on('change', function () {
+  console.log("changed");
+  updateTimeSlider(mySlider.getRange());
+});
+
+// Initial start and end years
+updateTimeSlider([1896, 2016]);
