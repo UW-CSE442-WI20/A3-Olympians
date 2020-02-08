@@ -1,18 +1,17 @@
 const d3 = require("d3");
 const _ = require("underscore");
-//const timeSlider = require("./timeslider.js");
-import {slider} from './timeslider';
+import {
+  slider
+} from './timeslider'
 
 var outerWidth = 1200;
 var outerHeight = 800;
-
 var margin = {
   left: 60,
   top: 30,
   right: 30,
   bottom: 30
 };
-
 var innerWidth = outerWidth - margin.left - margin.right;
 var innerHeight = outerHeight - margin.top - margin.bottom;
 var circleRadius = 3;
@@ -21,20 +20,21 @@ var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
 var endYear = 2016;
+var currentNOCs = [];
 
 //const xScale = d3.scaleLinear().domain([0, 135000]).range([margin["left"], innerWidth]);
 const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
-const yScale = d3.scaleTime().domain([startYear, endYear]).range([margin["bottom"], innerHeight]);
+const yScale = d3.scaleTime().domain([startYear, 2016]).range([margin["bottom"], innerHeight]);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 // get the svg
 var svg = d3.select('svg');
-//var svg = d3.select("#vis");
 // axes
 
 // for plotting points
 const xValue = d => d.ID;
 
+//var xAxis = d3.axisBottom(xScale);
 var xAxis = d3.axisBottom(xScale)
   .tickPadding(30);
 //.tickSize(-innerHeight);
@@ -56,7 +56,6 @@ var yAxisGroup = svg.append("g")
   .attr("transform", "translate(" + margin["left"] + ",0)")
   .call(yAxis);
 
-
 // group for the visualization
 var chart = svg.append("g")
   .attr("class", "chart")
@@ -67,22 +66,31 @@ var NOCs = [];
 // Load in the data
 const csvFile = require('../olympic_overall.csv');
 
-function updateData(idx, NOCs, entriesByName) {
-  console.log(NOCs);
-  console.log(NOCs[idx]);
+function updateData(data, NOCs, entriesByName) {
+  console.log("updating");
+  // do something here
+  // console.log(NOCs);
+  // console.log(NOCs[idx]);
   // get the data of the NOC
-  console.log(NOCs[idx].values);
+
+  //console.log("values", NOCs[idx].values);
   // Render the lines
-  chart.selectAll("line").remove();
-  chart.selectAll("circle").remove();
-  chart.selectAll("line").data(NOCs[idx].values)
+  // chart.selectAll("line").remove();
+  // chart.selectAll("circle").remove();
+
+  console.log("data values:", data);
+  chart.append("g").selectAll("line").data(NOCs[data].values)
     .enter()
     .append("line")
+    .attr("id", "l" + data)
     .style("stroke", function(d) {
+      // console.log("value of d:", d);
+      // console.log(d[colorColumn]);
       return colorScale(d[colorColumn]);
     })
     .style("stroke-width", 1)
     .attr("x1", function(d) {
+      // console.log("d=", d);
       return xScale(d[xColumn]);
     })
     .attr("y1", function(d) {
@@ -94,9 +102,11 @@ function updateData(idx, NOCs, entriesByName) {
     .attr("y2", function(d) {
       return yScale(d["End"]);
     });
-  chart.selectAll('circle').data(NOCs[idx].values)
+
+  chart.append("g").selectAll('circle').data(NOCs[data].values)
     .enter()
-    .append('circle')
+    .append("circle")
+    .attr("id", "c" + data)
     .attr("cx", function(d) {
       return xScale(d[xColumn]);
     })
@@ -139,7 +149,6 @@ function updateData(idx, NOCs, entriesByName) {
       d3.select(this)
         .transition()
         .attr("r", circleRadius)
-        .attr("fill", function(d) { return colorScale(d[colorColumn]); })
         .attr("fill", function(d) {
           return colorScale(d[colorColumn]);
         });
@@ -159,11 +168,13 @@ function updateData(idx, NOCs, entriesByName) {
       athleteData.values.forEach(function(element) {
         console.log(element);
       });
+
     });
 }
 
 d3.csv(csvFile).then(function(data) {
-  console.log(data);
+  //console.log(data);
+
   // convert each value to its appropriate data type
   data.forEach(function(d) {
     d.ID = +d.ID;
@@ -178,14 +189,14 @@ d3.csv(csvFile).then(function(data) {
     })
     .entries(data);
 
-  // make the NOC the key
+  // make the name the key
   var entriesByNOC = d3.nest()
     .key(function(d) {
       return d.NOC;
     })
     .entries(data);
 
-  // make the Start Year the key then Name the secondary key
+  // make the start year the key then name the secondary key
   var entriesByStartThenName = d3.nest()
     .key(function(d) {
       return d.Start;
@@ -212,60 +223,51 @@ d3.csv(csvFile).then(function(data) {
     select.options[select.options.length] = new Option(NOCs[index], index);
   }
 
-  updateData(0, entriesByNOC, entriesByName);
-  activities = document.getElementById('select-NOC').addEventListener('change', function() {
+  //updateData(0, entriesByNOC, entriesByName);
+  document.getElementById('select-NOC').addEventListener('change', function() {
     var activities = document.getElementById('select-NOC');
     var selectedOptions = activities.selectedOptions || [].filter.call(activities.options, option => option.selected);
     var selectedValues = [].map.call(selectedOptions, option => option.value);
     console.log(selectedValues);
 
-    var currentNOCs = [];
-    var res = currentNOCs.filter(item1 =>
-      !selectedValues.some(item2 => (item2.id === item1.id && item2.name === item1.name)))
-
-
-    if (currentNOCs.length > selectedValues.length) {
-      currentNOCs.pop(res[0]);
+    //saving this stuff
+    if (selectedValues.length > currentNOCs.length) {
+      // we added a value so the current NOCs have to be updated
+      var intersect = _.difference(selectedValues, currentNOCs);
+      console.log("first intersection: ", intersect);
+      currentNOCs.push(intersect[0]);
+      updateData(intersect[0], entriesByNOC, entriesByName);
+      // add some line
     } else {
-      currentNOCs.push(res[0]);
+      // we removed a value so current NOCs have to be updated
+      var intersect = _.difference(currentNOCs, selectedValues);
+      console.log("second intersection: ", intersect);
+      currentNOCs.pop(intersect[0]);
+      removeData(intersect[0]);
     }
-    console.log("current NOCs ", currentNOCs);
-    console.log("selected values ", selectedValues);
-    console.log("intersection: ", res);
-
-    updateData(this.value, entriesByNOC, entriesByName);
-    // update the current dots that we're displaying
     console.log('You selected: ', this.value);
   });
-
-  // activities.addEventListener("click", function() {
-  //   var currentNOCs = [];
-  //   if (this.value in currentNOCs) {
-  //     currentNOCs.pop(this.value);
-  //   } else {
-  //     currentNOCs.push(this.value);
-  //   }
-  //   console.log(values);
-  //   console.log(this);
-  //   console.log("values", this.value);
-  //   console.log(currentNOCs);
-  // });
-
 });
+
+function removeData(value) {
+  svg.selectAll("#c" + value).remove();
+  svg.selectAll("#l" + value).remove();
+}
 
 // RENDER THE TIME SLIDER
 var mySlider = slider(1896, 2016);
 
-// when the input range changes update the start and end years
-d3.select('#eventHandler').on('change', function() {
+
+// when the input range changes update the start year
+d3.select("#eventHandler").on("change", function() {
   console.log("changed");
   updateTimeSlider(mySlider.getRange());
 });
 
-// Initial start and end years
+// Initial starting year
 updateTimeSlider([1896, 2016]);
 
-// update the chart elements
+// update the elements
 function updateTimeSlider(range) {
   startYear = range[0];
   endYear = range[1];
@@ -277,14 +279,26 @@ function updateTimeSlider(range) {
 
   // update lines
   var l = chart.selectAll("line")
-               .transition()
-               .attr("x1", function(d) { return xScale(d[xColumn]); })
-               .attr("y1", function(d) { return yScale(d["Start"]); })
-               .attr("x2", function(d) { return xScale(d[xColumn]); })
-               .attr("y2", function(d) { return yScale(d["End"]); });
+    .transition()
+    .attr("x1", function(d) {
+      return xScale(d[xColumn]);
+    })
+    .attr("y1", function(d) {
+      return yScale(d["Start"]);
+    })
+    .attr("x2", function(d) {
+      return xScale(d[xColumn]);
+    })
+    .attr("y2", function(d) {
+      return yScale(d["End"]);
+    });
   // update circles
   var c = chart.selectAll("circle")
-               .transition()
-               .attr("cx", function(d) { return xScale(d[xColumn]); })
-               .attr("cy", function(d) { return yScale(d[yColumn]); });
-  }
+    .transition()
+    .attr("cx", function(d) {
+      return xScale(d[xColumn]);
+    })
+    .attr("cy", function(d) {
+      return yScale(d[yColumn]);
+    });
+}
