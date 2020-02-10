@@ -8,11 +8,11 @@ body {
 .grid-container {
   display: grid;
   grid-template-areas:
-    "header header"
-    "content content"
-    "sidebar sidebar"
-    "smallchart smallchart"
-    "footer footer";
+    "header header header"
+    "content content smallchart"
+    "sidebar sidebar sidebar"
+    /*"smallchart smallchart"*/
+    "footer footer footer";
   /*height: 600px;**/
 }
 
