@@ -6,7 +6,6 @@
 
 const d3 = require("d3");
 const _ = require("underscore");
-//const timeSlider = require("./timeslider.js");
 import { slider } from './timeslider';
 
 var outerWidth = 1200;
@@ -32,6 +31,7 @@ const csvFile = require('../olympic_overall.csv');
 
 var medalCounts;
 var maxMedals;
+
 // data structures to be loaded in
 
 // make the Name the key
@@ -58,21 +58,19 @@ const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 // get the svg
 var svg = d3.select('svg');
-//var svg = d3.select("#vis");
-// axes
 
 // for plotting points
 const xValue = d => d.ID;
 
+// axes
 var xAxis = d3.axisBottom(xScale)
   .tickPadding(30);
-//.tickSize(-innerHeight);
 var yAxis = d3.axisLeft(yScale)
   .tickValues([1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932,
     1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980,
     1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016
   ])
-  .tickFormat(d3.format("Y")) // d3.format("d") // gets rid of commas in the dates
+  .tickFormat(d3.format("Y")) // gets rid of commas in the dates
   .tickSize(-innerWidth);
 
 // add axis groups to svg
@@ -85,12 +83,23 @@ var yAxisGroup = svg.append("g")
   .attr("transform", "translate(" + margin["left"] + ",0)")
   .call(yAxis);
 
+// define clipping path so that drawing stays within the chart
+// while using the timeslider
+var clippath = svg.append("clipPath")
+	.attr("id", "chart-clip")
+  .append("rect")
+	.attr("x", 0)
+	.attr("y", margin["bottom"] - 6)  // magic number :o
+	.attr("width", outerWidth)
+	.attr("height", yAxisGroup.node().getBBox().height); //innerHeight
 
-// group for the visualization
+// apply clipping path
+svg.attr("clip-path","url(#chart-clip)");
+
+// add group for the visualization
 var chart = svg.append("g")
   .attr("class", "chart")
   .attr("transform", "translate(10,0)");
-
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -136,9 +145,8 @@ function redraw(inputData) {
       return colorScale(d[colorColumn]);
     })
     .attr("label", function (d) {
-      return d.Name
+      return d.Name;
     })
-    //.attr(circleAttrs)
     .on("mouseover", function (d) {
       // circle gets bigger
       d3.select(this)
@@ -148,7 +156,6 @@ function redraw(inputData) {
       //Get this circle's x/y values, then augment for the tooltip
       var xPosition = parseFloat(d3.select(this).attr("cx"));
       var yPosition = parseFloat(d3.select(this).attr("cy"));
-      console.log("x: " + xPosition + " y: " + yPosition);
       //Create the tooltip label
       svg.append("text")
         .attr("id", "tooltip")
@@ -224,7 +231,7 @@ function initializeDataStructures(data) {
     })
     .entries(data);
 
-    
+
   // get only rows with medal
   const medalsOnly = _.filter(data, function (item) {
     return item.Medal.length > 0;
@@ -269,8 +276,8 @@ function setupNOCFiltering(data) {
     currPeople = _.filter(currPeople, (item) => {
       return item.NOC === NOCs[this.value];
     });
-    redraw(currPeople);
     // update the current dots that we're displaying
+    redraw(currPeople);
     console.log('You selected: ', this.value);
   });
 }
@@ -292,7 +299,7 @@ function setupMedalFiltering(data) {
 
 // function that returns the dataset with only the rows
 // containing the people with more than nMedals medals
-// parameters: data - the full dataset, 
+// parameters: data - the full dataset,
 // medalCounts - count of all the medals for each person
 // nMedals - current number of medals
 function filterByMedal(data, medalCounts, nMedals) {
@@ -308,14 +315,24 @@ function filterByMedal(data, medalCounts, nMedals) {
   return currPeople;
 }
 
-// update the chart elements
+// initialize the timeslider
+function initializeTimeSlider() {
+  var mySlider = slider(1896, 2016);
+  // Initial start and end years
+  updateTimeSlider([1896, 2016]);
+  // when the input range changes, update the start and end years
+  d3.select('#eventHandler').on('change', function () {
+    //console.log("changed");
+    updateTimeSlider(mySlider.getRange());
+  });
+}
+
+// update the chart elements based on the timeslider
 function updateTimeSlider(range) {
   startYear = range[0];
   endYear = range[1];
   // update the Y-axis
   yScale.domain([startYear, endYear]);
-  console.log("start: " + startYear);
-  console.log("end: " + endYear);
   yAxisGroup.transition().call(yAxis);
 
   // update lines
@@ -341,7 +358,7 @@ function initializeOptions(data) {
   console.log(entriesByNOC);
 
   // Bin: For now, setupMedalFiltering has to be called before setupNOCFiltering
-  // due to dependencies. 
+  // due to dependencies.
   // TODO: Bin fix this
   setupMedalFiltering(data);
 
@@ -358,20 +375,10 @@ function initializeOptions(data) {
 d3.csv(csvFile).then(function (data) {
   // create the nested data structures
   initializeDataStructures(data);
+  // initialize x axis domain based on data
   xScale.domain(data.map(xValue));
-  // initialize/create all the dropdowns/filters that will be shown in the view 
+  // initialize timeSlider
+  initializeTimeSlider();
+  // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
 });
-
-
-// RENDER THE TIME SLIDER
-var mySlider = slider(1896, 2016);
-
-// when the input range changes update the start and end years
-d3.select('#eventHandler').on('change', function () {
-  console.log("changed");
-  updateTimeSlider(mySlider.getRange());
-});
-
-// Initial start and end years
-updateTimeSlider([1896, 2016]);

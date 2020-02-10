@@ -1,24 +1,36 @@
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// TIME RANGE SLIDER
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
 const d3 = require("d3");
 
-// TIME RANGE SLIDER
 export function slider(min, max) {
-  var range = [min, max + 1]
+  var myrange = [min, max + 1];
+  var slidervalues = [1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932,
+    1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980,
+    1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016];
   // set width and height of slider control
- var w = 400
- var h = 300
- var controlMargin = {top: 140, bottom: 145, left: 40, right: 40}
+  var w = 400;
+  var h = 300;
+  var controlMargin = {top: 140, bottom: 145, left: 40, right: 40};
   // dimensions of slider bar
- var width = w - controlMargin.left - controlMargin.right;
- var height = h - controlMargin.top - controlMargin.bottom;
- // create x scale
-   var x = d3.scaleLinear()
-     .domain(range)  // data space
+  var width = w - controlMargin.left - controlMargin.right;
+  var height = h - controlMargin.top - controlMargin.bottom;
+  // create x scale
+  var x = d3.scaleLinear()
+     .domain(myrange)  // data space
      .range([0, width]);  // display space
+
   // create translated g
-  const g = d3.select("#timeSlider").append('g').attr('transform', "translate(60,0)");
+  const g = d3.select("#timeSlider")
+    .append('g')
+    .attr('transform', "translate(60,0)");
+
   // draw background lines
   g.append('g').selectAll('line')
-    .data(d3.range(range[0], range[1]+1))
+    .data(d3.range(myrange[0], myrange[1]+1))
     .enter()
     .append('line')
     .attr('x1', d => x(d)).attr('x2', d => x(d))
@@ -30,34 +42,37 @@ export function slider(min, max) {
     .attr('id', 'labelleft')
     .attr('x', 0)
     .attr('y', height + 15)
-    .text(range[0]);
+    .text(myrange[0]);
   var labelR = g.append('text')
     .attr('id', 'labelright')
     .attr('x', 0)
     .attr('y', height + 15)
-    .text(range[1]);
+    .text(myrange[1]);
 
     // define brush
     var brush = d3.brushX()
       .extent([[0,0], [width, height]])
       .on('brush', function() {
         var s = d3.event.selection;
-        // update and move labels
+        var svg = d3.select('svg');
+        var val = s.map(d => Math.round(x.invert(d)));
+        svg.node().value = determineYear(val, slidervalues);
+      // update and move labels
       labelL.attr('x', s[0])
-        .text(Math.round(x.invert(s[0])))
+        .text(svg.node().value[0]);
       labelR.attr('x', s[1])
-        .text(Math.round(x.invert(s[1])) - 1)
+        .text(svg.node().value[1]);
       // move brush handles
       handle
         .attr("display", null)
-        .attr("transform", function(d, i) { return "translate(" + [ s[i], - height / 4] + ")"; });
+        .attr("transform", function(d, i) {
+          return "translate(" + [ s[i], - height / 4] + ")"; });  // CHANGE HANDLE POSITION HERE
         // update view
         // if the view should only be updated after brushing is over,
         // move these two lines into the on('end') part below
-        var svg = d3.select('svg');
-        svg.node().value = s.map(d => Math.round(x.invert(d)));
         svg.node().dispatchEvent(new CustomEvent("input"));
-        let event = new Event("change"); eventHandler.dispatchEvent(event);
+        let event = new Event("change");
+        eventHandler.dispatchEvent(event);
       })
 
     // append brush to g
@@ -80,10 +95,8 @@ export function slider(min, max) {
       .enter().append("path")
       .attr("class", "handle--custom")
       .attr("transform", "translate(10,10)")
-      //.attr("stroke", "#000")
-      .attr("stroke", "orange")
+      .attr("stroke", "blue")
       .attr("stroke-width", 1.5)
-      //.attr("fill", '#eee')
       .attr("fill", "blue")
       .attr("cursor", "ew-resize")
       .attr("d", brushResizePath);  // the brush shape
@@ -104,11 +117,34 @@ export function slider(min, max) {
   }
 
     // select entire range
-    gBrush.call(brush.move, range.map(x));
+    gBrush.call(brush.move, myrange.map(x));
 
     var getRange = function() {
-      var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)))
+      var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
+      range = determineYear(range, slidervalues);
+      console.log("RANGE ", range);
       return range }
 
      return {getRange: getRange}
+  }
+
+//// HELPER FUNCTION
+//// Round slider value to the nearest valid Olympic year
+  function determineYear(val, slidervalues) {
+    // get start year
+    for (let i = 0; i < slidervalues.length; i++) {
+      if (Math.abs(slidervalues[i] - val[0]) <= 3) {
+        val[0] = slidervalues[i];
+        break;
+      }
+    }
+    // get end year
+    for (let i = 0; i < slidervalues.length; i++) {
+      if (Math.abs(slidervalues[i] - val[1]) <= 3) {
+
+        val[1] = slidervalues[i];
+        break;
+      }
+    }
+    return val;
   }
