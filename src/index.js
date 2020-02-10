@@ -184,11 +184,11 @@ function redraw(inputData) {
           return item.key === d.Name;
         });
         console.log("result: " + athleteData.values);
-  
+
         athleteData.values.forEach(function (element) {
           console.log(element);
         });
-  
+
       });
   }
 }
@@ -262,7 +262,6 @@ function setupNOCFiltering(data) {
     var selectedOptions = activities.selectedOptions || [].filter.call(activities.options, option => option.selected);
     selectedValues = [].map.call(selectedOptions, option => option.value);
     var medals = document.getElementById('numMedals').value;
-
     //saving this stuff
     if (selectedValues.length > currentNOCs.length) {
       // we added a value so the current NOCs have to be updated
@@ -277,7 +276,8 @@ function setupNOCFiltering(data) {
     } else {
       // we removed a value so current NOCs have to be updated
       var intersect = _.difference(currentNOCs, selectedValues);
-      currentNOCs.pop(intersect[0]);
+      var index = currentNOCs.indexOf(intersect[0]);
+      currentNOCs.splice(index, 1);
       removeData(entriesByNOC[intersect[0]].key);
     }
 
