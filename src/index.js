@@ -10,14 +10,12 @@ import { slider } from './timeslider';
 
 var outerWidth = 1200;
 var outerHeight = 800;
-
 var margin = {
   left: 60,
   top: 30,
   right: 30,
   bottom: 30
 };
-
 var innerWidth = outerWidth - margin.left - margin.right;
 var innerHeight = outerHeight - margin.top - margin.bottom;
 var circleRadius = 3;
@@ -26,12 +24,13 @@ var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
 var endYear = 2016;
+var currentNOCs = [];
 
 const csvFile = require('../olympic_overall.csv');
 
 var medalCounts;
 var maxMedals;
-
+var selectedValues;
 // data structures to be loaded in
 
 // make the Name the key
@@ -53,7 +52,7 @@ var NOCs = [];
 
 //const xScale = d3.scaleLinear().domain([0, 135000]).range([margin["left"], innerWidth]);
 const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
-const yScale = d3.scaleTime().domain([startYear, endYear]).range([margin["bottom"], innerHeight]);
+const yScale = d3.scaleTime().domain([startYear, 2016]).range([margin["bottom"], innerHeight]);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 // get the svg
@@ -63,6 +62,7 @@ var svg = d3.select('svg');
 const xValue = d => d.ID;
 
 // axes
+//var xAxis = d3.axisBottom(xScale);
 var xAxis = d3.axisBottom(xScale)
   .tickPadding(30);
 var yAxis = d3.axisLeft(yScale)
@@ -110,91 +110,98 @@ var chart = svg.append("g")
 // function to draw lines and points given inputData
 // Note: currently does not support .exit() functionality
 function redraw(inputData) {
-  chart.selectAll("line").remove();
-  chart.selectAll("circle").remove();
-  chart.selectAll("line").data(inputData)
-    .enter()
-    .append("line")
-    .style("stroke", function (d) {
-      return colorScale(d[colorColumn]);
-    })
-    .style("stroke-width", 1)
-    .attr("x1", function (d) {
-      return xScale(d[xColumn]);
-    })
-    .attr("y1", function (d) {
-      return yScale(d["Start"]);
-    })
-    .attr("x2", function (d) {
-      return xScale(d[xColumn]);
-    })
-    .attr("y2", function (d) {
-      return yScale(d["End"]);
-    });
-  chart.selectAll('circle').data(inputData)
-    .enter()
-    .append('circle')
-    .attr("cx", function (d) {
-      return xScale(d[xColumn]);
-    })
-    .attr("cy", function (d) {
-      return yScale(d[yColumn]);
-    })
-    .attr("r", circleRadius)
-    .attr("fill", function (d) {
-      return colorScale(d[colorColumn]);
-    })
-    .attr("label", function (d) {
-      return d.Name;
-    })
-    .on("mouseover", function (d) {
-      // circle gets bigger
-      d3.select(this)
-        .transition()
-        .attr("r", circleRadius + 3)
-        .attr("fill", "orange");
-      //Get this circle's x/y values, then augment for the tooltip
-      var xPosition = parseFloat(d3.select(this).attr("cx"));
-      var yPosition = parseFloat(d3.select(this).attr("cy"));
-      //Create the tooltip label
-      svg.append("text")
-        .attr("id", "tooltip")
-        .attr("x", xPosition)
-        .attr("y", yPosition)
-        .attr("text-anchor", "right")
-        .attr("font-family", "sans-serif")
-        .attr("font-size", "11px")
-        .attr("font-weight", "bold")
-        .attr("fill", "black")
-        .style("pointer-events", "none")
-        .text(d.Name);
-    })
-    .on("mouseout", function () {
-      // back to small circles
-      d3.select(this)
-        .transition()
-        .attr("r", circleRadius)
-        .attr("fill", function (d) { return colorScale(d[colorColumn]); })
-        .attr("fill", function (d) {
-          return colorScale(d[colorColumn]);
+  // chart.selectAll("line").remove();
+  // chart.selectAll("circle").remove();
+  console.log("redrawing:", inputData);
+  if (typeof inputData !== 'undefined') {
+    chart.append("g").selectAll("line").data(inputData.values)
+      .enter()
+      .append("line")
+      .attr("id", "l" + inputData.key)
+      .style("stroke", function (d) {
+        return colorScale(d[colorColumn]);
+      })
+      .style("stroke-width", 1)
+      .attr("x1", function (d) {
+        return xScale(d[xColumn]);
+      })
+      .attr("y1", function (d) {
+        return yScale(d["Start"]);
+      })
+      .attr("x2", function (d) {
+        return xScale(d[xColumn]);
+      })
+      .attr("y2", function (d) {
+        return yScale(d["End"]);
+      });
+    chart.append("g").selectAll('circle').data(inputData.values)
+      .enter()
+      .append('circle')
+      .attr("id", "c" + inputData.key)
+      .attr("cx", function (d) {
+        return xScale(d[xColumn]);
+      })
+      .attr("cy", function (d) {
+        return yScale(d[yColumn]);
+      })
+      .attr("r", circleRadius)
+      .attr("fill", function (d) {
+        return colorScale(d[colorColumn]);
+      })
+      .attr("label", function (d) {
+        return d.Name
+      })
+      //.attr(circleAttrs)
+      .on("mouseover", function (d) {
+        // circle gets bigger
+        d3.select(this)
+          .transition()
+          .attr("r", circleRadius + 3)
+          .attr("fill", "orange");
+        //Get this circle's x/y values, then augment for the tooltip
+        var xPosition = parseFloat(d3.select(this).attr("cx"));
+        var yPosition = parseFloat(d3.select(this).attr("cy"));
+        console.log("x: " + xPosition + " y: " + yPosition);
+        //Create the tooltip label
+        svg.append("text")
+          .attr("id", "tooltip")
+          .attr("x", xPosition)
+          .attr("y", yPosition)
+          .attr("text-anchor", "right")
+          .attr("font-family", "sans-serif")
+          .attr("font-size", "11px")
+          .attr("font-weight", "bold")
+          .attr("fill", "black")
+          .style("pointer-events", "none")
+          .text(d.Name);
+      })
+      .on("mouseout", function () {
+        // back to small circles
+        d3.select(this)
+          .transition()
+          .attr("r", circleRadius)
+          .attr("fill", function(d) {
+            return colorScale(d[colorColumn]);
+          });
+        //Remove the tooltip
+        d3.select("#tooltip").remove();
+      })
+      .on("click", function (d) {
+        // get the data for the selected athlete
+        console.log(Object.values(d3.values(entriesByName)));
+        var athleteData = _.find(d3.values(entriesByName), function (item) {
+          // console.log("key: " + item.key);
+          // console.log("searching for: " + d.Name);
+          return item.key === d.Name;
         });
-      //Remove the tooltip
-      d3.select("#tooltip").remove();
-    })
-    .on("click", function (d) {
-      // get the data for the selected athlete
-      console.log(Object.values(d3.values(entriesByName)));
-      var athleteData = _.find(d3.values(entriesByName), function (item) {
-        // console.log("key: " + item.key);
-        // console.log("searching for: " + d.Name);
-        return item.key === d.Name;
-      });
-      console.log("result: " + athleteData.values);
+        console.log("result: " + athleteData.values);
 
-      athleteData.values.forEach(function (element) {
-        console.log(element);
+        athleteData.values.forEach(function (element) {
+          console.log(element);
+        });
+
       });
-    });
+  }
 }
 
 // function to set up the nested data structures
@@ -261,16 +268,29 @@ function setupNOCFiltering(data) {
     select.options[select.options.length] = new Option(NOCs[index], index);
   }
 
-  redraw(entriesByNOC[0].values);
-  document.getElementById('select-NOC').addEventListener('change', function () {
-    var currentNOCs = [];
-    if (this.value in currentNOCs) {
-      currentNOCs.pop(this.value);
-    } else {
+  document.getElementById('select-NOC').addEventListener('change', function() {
+    var activities = document.getElementById('select-NOC');
+    var selectedOptions = activities.selectedOptions || [].filter.call(activities.options, option => option.selected);
+    selectedValues = [].map.call(selectedOptions, option => option.value);
+    var medals = document.getElementById('numMedals').value;
+
+    //saving this stuff
+    if (selectedValues.length > currentNOCs.length) {
+      // we added a value so the current NOCs have to be updated
+      var intersect = _.difference(selectedValues, currentNOCs);
+      currentNOCs.push(intersect[0]);
+      redraw(filterByMedal(entriesByNOC[intersect[0]], medalCounts, medals));
+    } else if (selectedValues.length == currentNOCs.length) {
+      removeData(entriesByNOC[currentNOCs[0]].key);
+      redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
+      currentNOCs = [];
       currentNOCs.push(this.value);
+    } else {
+      // we removed a value so current NOCs have to be updated
+      var intersect = _.difference(currentNOCs, selectedValues);
+      currentNOCs.pop(intersect[0]);
+      removeData(entriesByNOC[intersect[0]].key);
     }
-    console.log("values", this.value);
-    console.log(currentNOCs);
 
     var currPeople = filterByMedal(data, medalCounts, document.getElementById('numMedals').value);
     currPeople = _.filter(currPeople, (item) => {
@@ -282,18 +302,30 @@ function setupNOCFiltering(data) {
   });
 }
 
+// lets us remove the circles and lines that we don't need
+function removeData(value) {
+  svg.selectAll("#c" + value).remove();
+  svg.selectAll("#l" + value).remove();
+}
+
 // function to setup Medal Filtering
 function setupMedalFiltering(data) {
   // populate dropdown with range of medals
   var medalsDD = document.getElementById("numMedals");
-  for (var i = 1; i <= maxMedals; i++) {
+  for (let i = 1; i <= maxMedals; i++) {
     medalsDD.options[medalsDD.options.length] = new Option(i, i);
   }
 
   d3.select("#numMedals")
     .on("input", function () {
-      const currPeople = filterByMedal(entriesByNOC[document.getElementById('select-NOC').value].values, medalCounts, this.value);
-      redraw(currPeople);
+      let currNOCObjects = [];
+      for (let i = 0; i < selectedValues.length; i++) {
+        currNOCObjects.push(entriesByNOC[selectedValues[i]]);
+        removeData(entriesByNOC[selectedValues[i]].key);
+      }
+      for (let j = 0; j < currNOCObjects.length; j++) {
+        redraw(filterByMedal(currNOCObjects[j], medalCounts, this.value));
+      }
     });
 }
 
@@ -309,10 +341,15 @@ function filterByMedal(data, medalCounts, nMedals) {
       currMedals.push(person);
     }
   }
-  const currPeople = _.filter(data, (item) => {
+  let currPeople = _.filter(data.values, (item) => {
     return _.indexOf(currMedals, item.Name) >= 0;
   });
-  return currPeople;
+  currPeople = d3.nest()
+    .key(function () {
+      return data.key;
+    })
+    .entries(currPeople);
+  return currPeople[0];
 }
 
 // initialize the timeslider
@@ -328,6 +365,8 @@ function initializeTimeSlider() {
 }
 
 // update the chart elements based on the timeslider
+
+// update the elements
 function updateTimeSlider(range) {
   startYear = range[0];
   endYear = range[1];
