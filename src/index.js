@@ -19,16 +19,23 @@ var margin = {
 var innerWidth = outerWidth - margin.left - margin.right;
 var innerHeight = outerHeight - margin.top - margin.bottom;
 var circleRadius = 3;
-var xColumn = "ID";
+var xColumn = "Order";
 var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
 var endYear = 2016;
-var minID = 0;
-var maxID = 135000;
+// var minID = 0;
+// var maxID = 135000;
+
+var minOrder = 0;
+var maxOrder = 8760;
+
+var currMinOrder = 0;
+var currMaxOrder = 0;
+
 var currentNOCs = [];
 
-const csvFile = require('../olympic_overall.csv');
+const csvFile = require('../data/olympic_overall.csv');
 
 var medalCounts;
 var maxMedals;
@@ -52,7 +59,9 @@ var NOCs = [];
 ///////////////////////////////////////////////////////
 
 
-const xScale = d3.scaleLinear().domain([minID, maxID]).range([margin["left"], innerWidth]);
+// const xScale = d3.scaleLinear().domain([minID, maxID]).range([margin["left"], innerWidth]);
+const xScale = d3.scaleLinear().domain([minOrder, maxOrder]).range([margin["left"], innerWidth]);
+
 //const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
 const yScale = d3.scaleTime().domain([startYear, endYear]).range([margin["bottom"], innerHeight]);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -61,12 +70,15 @@ const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 var svg = d3.select('svg');
 
 // for plotting points
-const xValue = d => d.ID;
+const xValue = d => d.Order;
 
 // axes
 //var xAxis = d3.axisBottom(xScale);
 var xAxis = d3.axisBottom(xScale)
-  .tickPadding(30);
+  .tickPadding(30)
+  .tickValues([500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000,
+  5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000
+])
 var yAxis = d3.axisLeft(yScale)
   .tickValues([1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932,
     1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980,
@@ -118,22 +130,39 @@ function redraw(inputData) {
   if (typeof inputData !== 'undefined') {
     // update X-axis to scale based on inputData
     // find the min and max ID for this input selection
-    var athleteMinID = _.min(inputData.values, function (item) {
-      return item.ID;
-    });
-    var athleteMaxID = _.max(inputData.values, function (item) {
-      return item.ID;
-    });
-    minID = athleteMinID.ID;
-    maxID = athleteMaxID.ID;
+    // var athleteMinID = _.min(inputData.values, function (item) {
+    //   return item.ID;
+    // });
+    // var athleteMaxID = _.max(inputData.values, function (item) {
+    //   return item.ID;
+    // });
+    // minID = athleteMinID.ID;
+    // maxID = athleteMaxID.ID;
+
+    // min order temporarily in here
+
+    // var athleteMinOrder = _.min(inputData.values, function (item) {
+    //   // console.log(item.Order);
+    //   return item.Order;
+    // });
+    // var athleteMaxOrder = _.max(inputData.values, function (item) {
+    //   // console.log(item.Order);
+    //   return item.Order;
+    // });
+    // minOrder = athleteMinOrder.Order;
+    // maxOrder = athleteMaxOrder.Order;
+    //
+    // console.log("this is the minOrder", minOrder);
+    // console.log("this is the maxOrder", maxOrder);
+
     // update the X-axis
-    xScale.domain([minID, maxID]);
+    xScale.domain([minOrder, maxOrder]);
     xAxisGroup.transition().call(xAxis);
 
     chart.append("g").selectAll("line").data(inputData.values)
       .enter()
       .append("line")
-      .attr("id", "l" + inputData.key)
+      // .attr("id", "l" + inputData.key)
       .style("stroke", function (d) {
         return colorScale(d[colorColumn]);
       })
@@ -153,7 +182,7 @@ function redraw(inputData) {
     chart.append("g").selectAll('circle').data(inputData.values)
       .enter()
       .append('circle')
-      .attr("id", "c" + inputData.key)
+      // .attr("id", "c" + inputData.key)
       .attr("cx", function (d) {
         return xScale(d[xColumn]);
       })
@@ -232,6 +261,7 @@ function initializeDataStructures(data) {
     d.ID = +d.ID;
     d.Age = +d.Age;
     d.Year = +d.Year;
+    d.Order = +d.Order;
   });
 
   // make the name the key
@@ -294,27 +324,63 @@ function setupNOCFiltering(data) {
     selectedValues = [].map.call(selectedOptions, option => option.value);
     var medals = document.getElementById('numMedals').value;
 
-    if (selectedValues.length > currentNOCs.length) {
-      // we added a value so the current NOCs have to be updated
-      var intersect = _.difference(selectedValues, currentNOCs);
-      currentNOCs.push(intersect[0]);
-      redraw(filterByMedal(entriesByNOC[intersect[0]], medalCounts, medals));
-    } else if (selectedValues.length == currentNOCs.length) {
-      removeData(entriesByNOC[currentNOCs[0]].key);
-      redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
-      currentNOCs = [];
-      currentNOCs.push(this.value);
-    } else {
-      // we removed a value so current NOCs have to be updated
-      var intersect = _.difference(currentNOCs, selectedValues);
-      for (var i = 0; i < intersect.length; i++) {
-        var index = currentNOCs.indexOf(intersect[i]);
-        currentNOCs.splice(index, 1);
-        removeData(entriesByNOC[intersect[i]].key);
+
+
+    chart.selectAll("line").remove();
+    chart.selectAll("circle").remove();
+    maxOrder = -Number.MAX_VALUE;
+    minOrder = Number.MAX_VALUE;
+
+    for (var i = 0; i < selectedValues.length; i++) {
+      var athleteMinOrder = _.min(entriesByNOC[selectedValues[i]].values, function (item) {
+        return item.Order;
+      });
+      var athleteMaxOrder = _.max(entriesByNOC[selectedValues[i]].values, function (item) {
+        return item.Order;
+      });
+
+      if (athleteMaxOrder.Order > maxOrder) {
+        maxOrder = athleteMaxOrder.Order;
       }
-      redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
-      //removeData(entriesByNOC[intersect[0]].key);
+
+      if (athleteMinOrder.Order < minOrder) {
+        minOrder = athleteMinOrder.Order;
+      }
+
+      console.log("max order selected", maxOrder);
+      console.log("min order selected", minOrder);
+
     }
+
+    // console.log(selectedValues);
+    // console.log(entriesByNOC[selectedValues[0]]);
+    for (var i = 0; i < selectedValues.length; i++) {
+      console.log("drawing: ", i);
+        redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medals));
+    }
+
+    // if (selectedValues.length > currentNOCs.length) {
+    //   // we added a value so the current NOCs have to be updated
+    //   var intersect = _.difference(selectedValues, currentNOCs);
+    //   currentNOCs.push(intersect[0]);
+    //   redraw(filterByMedal(entriesByNOC[intersect[0]], medalCounts, medals));
+    // } else if (selectedValues.length == currentNOCs.length) {
+    //   removeData(entriesByNOC[currentNOCs[0]].key);
+    //   redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
+    //   currentNOCs = [];
+    //   currentNOCs.push(this.value);
+    // } else {
+    //   // we removed a value so current NOCs have to be updated
+    //   var intersect = _.difference(currentNOCs, selectedValues);
+    //   for (var i = 0; i < intersect.length; i++) {
+    //     var index = currentNOCs.indexOf(intersect[i]);
+    //     currentNOCs.splice(index, 1);
+    //     removeData(entriesByNOC[intersect[i]].key);
+    //   }
+    //   redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
+    //   currentNOCs.push(this.value);
+    //   //removeData(entriesByNOC[intersect[0]].key);
+    // }
 
     console.log('You selected: ', this.value);
   });
@@ -353,6 +419,9 @@ function setupMedalFiltering(data) {
 // medalCounts - count of all the medals for each person
 // nMedals - current number of medals
 function filterByMedal(data, medalCounts, nMedals) {
+  //chart.selectAll("line").remove();
+  //chart.selectAll("circle").remove();
+
   let currMedals = [];
   for (var person in medalCounts) {
     if (medalCounts[person] >= nMedals) {
