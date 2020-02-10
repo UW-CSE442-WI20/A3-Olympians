@@ -24,6 +24,8 @@ var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
 var endYear = 2016;
+var minID = 0;
+var maxID = 135000;
 var currentNOCs = [];
 
 const csvFile = require('../olympic_overall.csv');
@@ -50,8 +52,8 @@ var NOCs = [];
 ///////////////////////////////////////////////////////
 
 
-//const xScale = d3.scaleLinear().domain([0, 135000]).range([margin["left"], innerWidth]);
-const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
+const xScale = d3.scaleLinear().domain([minID, maxID]).range([margin["left"], innerWidth]);
+//const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
 const yScale = d3.scaleTime().domain([startYear, 2016]).range([margin["bottom"], innerHeight]);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -114,6 +116,20 @@ function redraw(inputData) {
   // chart.selectAll("circle").remove();
   console.log("redrawing:", inputData);
   if (typeof inputData !== 'undefined') {
+    // update X-axis to scale based on inputData
+    // find the min and max ID for this input selection
+    var athleteMinID = _.min(inputData.values, function (item) {
+      return item.ID;
+    });
+    var athleteMaxID = _.max(inputData.values, function (item) {
+      return item.ID;
+    });
+    minID = athleteMinID.ID;
+    maxID = athleteMaxID.ID;
+    // update the X-axis
+    xScale.domain([minID, maxID]);
+    xAxisGroup.transition().call(xAxis);
+
     chart.append("g").selectAll("line").data(inputData.values)
       .enter()
       .append("line")
@@ -526,7 +542,7 @@ d3.csv(csvFile).then(function (data) {
   // create the nested data structures
   initializeDataStructures(data);
   // initialize x axis domain based on data
-  xScale.domain(data.map(xValue));
+  //xScale.domain(data.map(xValue));
   // initialize timeSlider
   initializeTimeSlider();
   // initialize/create all the dropdowns/filters that will be shown in the view
