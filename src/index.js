@@ -312,7 +312,7 @@ function setupNOCFiltering(data) {
         currentNOCs.splice(index, 1);
         removeData(entriesByNOC[intersect[i]].key);
       }
-      redraw(entriesByNOC[this.value], medalCounts, medals);
+      redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
       //removeData(entriesByNOC[intersect[0]].key);
     }
 
