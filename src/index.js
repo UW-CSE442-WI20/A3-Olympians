@@ -352,11 +352,9 @@ function setupNOCFiltering(data) {
 
     }
 
-    // console.log(selectedValues);
-    // console.log(entriesByNOC[selectedValues[0]]);
     for (var i = 0; i < selectedValues.length; i++) {
       console.log("drawing: ", i);
-        redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medals));
+      redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medals));
     }
 
     // if (selectedValues.length > currentNOCs.length) {
@@ -402,26 +400,23 @@ function setupMedalFiltering(data) {
 
   d3.select("#numMedals")
     .on("input", function () {
-      let currNOCObjects = [];
+      chart.selectAll("line").remove();
+      chart.selectAll("circle").remove();
       for (let i = 0; i < selectedValues.length; i++) {
-        currNOCObjects.push(entriesByNOC[selectedValues[i]]);
-        removeData(entriesByNOC[selectedValues[i]].key);
-      }
-      for (let j = 0; j < currNOCObjects.length; j++) {
-        redraw(filterByMedal(currNOCObjects[j], medalCounts, this.value));
+        redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, this.value));
       }
     });
 }
 
-// function that returns the dataset with only the rows
-// containing the people with more than nMedals medals
-// parameters: data - the full dataset,
-// medalCounts - count of all the medals for each person
-// nMedals - current number of medals
+/*  
+  function that returns the dataset with values as the rows
+  containing the people with more than nMedals medals and
+  with key as the NOC
+  parameters: data - the full dataset,
+  medalCounts - count of all the medals for each person
+  nMedals - current number of medals
+*/
 function filterByMedal(data, medalCounts, nMedals) {
-  //chart.selectAll("line").remove();
-  //chart.selectAll("circle").remove();
-
   let currMedals = [];
   for (var person in medalCounts) {
     if (medalCounts[person] >= nMedals) {
