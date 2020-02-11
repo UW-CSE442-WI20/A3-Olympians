@@ -2,31 +2,68 @@ body {
   width: 80%;
   margin: 0; padding: 0;
   display: flex;
-  font-family: sans-serif; font-size: 75%;
+  flex-basis: 100%;
+  font-family: "Arial Black", Gadget, sans-serif;
+  fill: #293462;
+  font-size: 75%;
+  background: #FDFDFC;
 }
+
+h1 {
+  font-family: "Arial Black", Gadget, sans-serif;
+  color: #25CED8;
+  font: 30px sans-serif;
+  font-weight: bold;
+  text-align: left;
+  letter-spacing: 3px;
+  margin-left: 60px;
+  /* text-shadow: 1px 1px #50b6bb; */
+}
+
+svg {
+  flex-basis: 100%;
+  min-width: 200px;
+}
+
+.chart {
+  background-color: #FDFDFC;
+}
+
+.axis {
+  fill: none;
+}
+
+.axis path {
+  stroke: none;
+}
+
+.axis line {
+  stroke: Gray;
+  opacity: .5;
+}
+
+.axis text {
+  font-family: "Arial Black", Gadget, sans-serif;
+  fill: #293462;
+}
+
 
 .grid-container {
   display: grid;
   grid-template-areas:
-    "header header header"
+    "header searchbar searchbar"
+    "content content smallchart"
     "content content smallchart"
     "sidebar sidebar sidebar";
-    /*"smallchart smallchart"*/
-    /*"footer footer footer";
-  /*height: 600px;**/
 }
 
 .grid-element.header {
-  background-color: beige;
+  background-color: #FDFDFC;
   grid-area: header;
-  padding: 300;
-}
-.grid-element.footer {
-  background-color: beige;
-  grid-area: footer;
+  padding: 100;
 }
 .grid-element.content {
-  background-color: none;
+  background-color: #FDFDFC;
   grid-area: content;
   display: flex;
 }
@@ -36,8 +73,14 @@ body {
 }
 
 .grid-element.smallchart {
-  background-color: none;
+  background-color: #FDFDFC;
   grid-area: smallchart;
+  display: flex;
+}
+
+.grid-element.searchbar {
+  background-color: #FCF9EC;
+  grid-area: searchbar;
   display: flex;
 }
 
@@ -52,6 +95,7 @@ body {
 
 .dropdown select{
 	width: fill;
+  height: 150px;
 }
 
 .searchbar {
@@ -64,6 +108,7 @@ body {
   position: relative;
   display: inline-block;
   width: 300px;
+  margin-top: 10px;
 }
 input {
   border: 1px solid transparent;
@@ -109,30 +154,4 @@ input[type=submit] {
   /*when navigating through the items using the arrow keys:*/
   background-color: DodgerBlue !important;
   color: #ffffff;
-}
-
-/* #eventHandler {
-  display: none;
-} */
-
-h1 {
-  color: blue;
-  text-align: center;
-}
-
-svg {
-  flex-basis: 100%;
-  min-width: 200px;
-}
-
-.axis {
-  fill: none;
-}
-
-.axis path {
-  stroke: none;
-}
-
-.axis line {
-  stroke: Gray;
 }
