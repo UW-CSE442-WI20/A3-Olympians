@@ -118,6 +118,8 @@ var chart = svg.append("g")
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
 
+// noc is the one you wanna remove
+
 // function to draw lines and points given inputData
 // Note: currently does not support .exit() functionality
 function redraw(inputData) {
@@ -127,13 +129,17 @@ function redraw(inputData) {
     xScale.domain([minOrder, maxOrder]);
     xAxisGroup.transition().call(xAxis);
 
-    chart.append("g").selectAll("line").data(inputData.values)
+    var line = chart.append("g").selectAll("line").data(inputData.values)
       .enter()
       .append("line")
+      .style("opacity", 0)
       .style("stroke", function(d) {
         return colorScale(d[colorColumn]);
       })
       .style("stroke-width", 1)
+      .attr("id", function(d) {
+        return "l" + d.NOC;
+      })
       .attr("x1", function(d) {
         return xScale(d[xColumn]);
       })
@@ -146,23 +152,65 @@ function redraw(inputData) {
       .attr("y2", function(d) {
         return yScale(d["End"]);
       });
-    chart.append("g").selectAll('circle').data(inputData.values)
+
+      line.transition()
+      .delay(3500)
+      .ease(d3.easeLinear)
+      .duration(1250)
+      .style("opacity", 1.0)
+
+    var circle = chart.append("g").selectAll('circle').data(inputData.values)
       .enter()
       .append('circle')
+      .style("opacity", 0)
+      .attr("id", function(d) {
+        return "c" + d.NOC;
+      })
+      .attr("cx", function(d) {
+        // return xScale(d[xColumn]);
+        return xScale((maxOrder + minOrder) / 2);
+      })
+      .attr("cy", function(d) {
+        return yScale(d[yColumn]);
+      })
+      .attr("r", circleRadius)
+      .attr("fill", "grey")
+      .attr("label", function(d) {
+        return d.Name
+      })
+
+    circle.transition()
+      .delay(1000)
+      .duration(1000)
+      .style("opacity", 1.0)
+      .attr("cx", function(d) {
+        // return xScale(d[xColumn]);
+        return xScale((maxOrder + minOrder) / 2);
+      })
+      .attr("cy", function(d) {
+        return yScale(d[yColumn]);
+      })
+      .attr("r", circleRadius)
+      .attr("fill", "grey")
+      .attr("label", function(d) {
+        return d.Name
+      })
+
+    circle.transition()
+      .delay(1500)
+      .duration(2000)
+      .ease(d3.easeQuadIn)
       .attr("cx", function(d) {
         return xScale(d[xColumn]);
       })
       .attr("cy", function(d) {
         return yScale(d[yColumn]);
       })
-      .attr("r", circleRadius)
       .attr("fill", function(d) {
         return colorScale(d[colorColumn]);
       })
-      .attr("label", function(d) {
-        return d.Name
-      })
-      .on("mouseover", function(d) {
+
+    circle.on("mouseover", function(d) {
         // circle gets bigger
         d3.select(this)
           .transition()
@@ -291,8 +339,36 @@ function setupNOCFiltering(data) {
     selectedValues = [].map.call(selectedOptions, option => option.value);
     //var medals = document.getElementById('numMedals').value;
 
-    chart.selectAll("line").remove();
-    chart.selectAll("circle").remove();
+    chart.selectAll("line")
+      .transition()
+      .style("opacity", 0)
+      .remove();
+
+    chart.selectAll("circle")
+      .transition()
+      .delay(200)
+      .duration(1000)
+      .ease(d3.easeQuadIn)
+      .attr("id", function(d) {
+        return "c" + d.NOC;
+      })
+      .attr("cx", function(d) {
+        // return xScale(d[xColumn]);
+        return xScale((maxOrder + minOrder) / 2);
+      })
+      .attr("cy", function(d) {
+        return yScale(d[yColumn]);
+      })
+      .attr("r", circleRadius)
+      .attr("fill", "grey")
+      .on("end",function() { // on end of transition...
+				    d3.select(this)
+				    	.transition() // second transition
+							.delay(750) // second delay
+              .duration(1000)
+              .style("opacity", 0)
+				});
+
     maxOrder = -Number.MAX_VALUE;
     minOrder = Number.MAX_VALUE;
 
@@ -316,7 +392,6 @@ function setupNOCFiltering(data) {
     for (var i = 0; i < selectedValues.length; i++) {
       redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]));
     }
-
 
   });
 }
