@@ -19,7 +19,7 @@ var margin = {
 var innerWidth = outerWidth - margin.left - margin.right;
 var innerHeight = outerHeight - margin.top - margin.bottom;
 var circleRadius = 3;
-var xColumn = "Order";
+var xColumn = "X";
 var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
@@ -29,9 +29,6 @@ var endYear = 2016;
 
 var minOrder = 0;
 var maxOrder = 8760;
-
-var currMinOrder = 0;
-var currMaxOrder = 0;
 
 var currentNOCs = [];
 
@@ -324,38 +321,90 @@ function setupNOCFiltering(data) {
     selectedValues = [].map.call(selectedOptions, option => option.value);
     var medals = document.getElementById('numMedals').value;
 
-
-
     chart.selectAll("line").remove();
     chart.selectAll("circle").remove();
-    maxOrder = -Number.MAX_VALUE;
-    minOrder = Number.MAX_VALUE;
+    // console.log("entriesByNOC[selectedValues[i]]", entriesByNOC[selectedValues[0]]);
 
+    // iterate through data, remove the things with the selected NOCs
+    var hold = [];
+    minOrder = 0;
+    maxOrder = 0;
     for (var i = 0; i < selectedValues.length; i++) {
-      var athleteMinOrder = _.min(entriesByNOC[selectedValues[i]].values, function (item) {
-        return item.Order;
+      var unique = d3.nest()
+        .key(function(d) {
+          return d.Order; })
+        .entries(entriesByNOC[selectedValues[i]].values);
+      maxOrder += unique.length;
+
+      console.log("unique:", unique);
+      unique.forEach(function(d) {
+        hold.push(d);
+        //console.log("printing out each", d.values[0]);
       });
-      var athleteMaxOrder = _.max(entriesByNOC[selectedValues[i]].values, function (item) {
-        return item.Order;
-      });
-
-      if (athleteMaxOrder.Order > maxOrder) {
-        maxOrder = athleteMaxOrder.Order;
-      }
-
-      if (athleteMinOrder.Order < minOrder) {
-        minOrder = athleteMinOrder.Order;
-      }
-
-      console.log("max order selected", maxOrder);
-      console.log("min order selected", minOrder);
-
     }
+
+    var sorted = hold.sort((a,b) =>  a.key - b.key)
+
+    index = 0;
+    sorted.forEach(function(d) {
+      d.values.forEach(function(e) {
+        e.X = index;
+      })
+      index++;
+    })
+
+    // console.log("total size:", size);
+    // console.log("hold values:", hold);
+    console.log("sorted hold:", sorted);
+
+    var cleaned = [];
+    sorted.forEach(function(d) {
+      d.values.forEach(function(e) {
+        cleaned.push(e);
+      })
+    })
+
+    var byNOC = d3.nest()
+      .key(function(d) {
+        return d.NOC; })
+      .entries(cleaned);
+
+    console.log("byNOC", byNOC);
+    console.log("selected values", entriesByNOC[selectedValues[0]]);
 
     for (var i = 0; i < selectedValues.length; i++) {
       console.log("drawing: ", i);
-      redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medals));
+      redraw(filterByMedal(byNOC[i], medalCounts, medals));
     }
+
+    // maxOrder = -Number.MAX_VALUE;
+    // minOrder = Number.MAX_VALUE;
+    //
+    // for (var i = 0; i < selectedValues.length; i++) {
+    //   var athleteMinOrder = _.min(entriesByNOC[selectedValues[i]].values, function (item) {
+    //     return item.Order;
+    //   });
+    //   var athleteMaxOrder = _.max(entriesByNOC[selectedValues[i]].values, function (item) {
+    //     return item.Order;
+    //   });
+    //
+    //   if (athleteMaxOrder.Order > maxOrder) {
+    //     maxOrder = athleteMaxOrder.Order;
+    //   }
+    //
+    //   if (athleteMinOrder.Order < minOrder) {
+    //     minOrder = athleteMinOrder.Order;
+    //   }
+    //
+    //   console.log("max order selected", maxOrder);
+    //   console.log("min order selected", minOrder);
+    //
+    // }
+
+    // for (var i = 0; i < selectedValues.length; i++) {
+    //   console.log("drawing: ", i);
+    //   redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medals));
+    // }
 
     // if (selectedValues.length > currentNOCs.length) {
     //   // we added a value so the current NOCs have to be updated
@@ -408,7 +457,7 @@ function setupMedalFiltering(data) {
     });
 }
 
-/*  
+/*
   function that returns the dataset with values as the rows
   containing the people with more than nMedals medals and
   with key as the NOC
