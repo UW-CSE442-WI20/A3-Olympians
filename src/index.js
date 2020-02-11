@@ -25,13 +25,9 @@ var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
 var endYear = 2016;
-// var minID = 0;
-// var maxID = 135000;
 
-var minOrder = 0;
-var maxOrder = 8760;
-
-var currentNOCs = [];
+var minAlphaOrder = 0;
+var maxAlphaOrder = 8760;
 
 const csvFile = require('../data/olympic_overall.csv');
 
@@ -59,7 +55,7 @@ var NOCs = [];
 
 
 // const xScale = d3.scaleLinear().domain([minID, maxID]).range([margin["left"], innerWidth]);
-const xScale = d3.scaleLinear().domain([minOrder, maxOrder]).range([margin["left"], innerWidth]);
+const xScale = d3.scaleLinear().domain([minAlphaOrder, maxAlphaOrder]).range([margin["left"], innerWidth]);
 
 //const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
 const yScale = d3.scaleTime().domain([startYear, endYear]).range([margin["bottom"], innerHeight]);
@@ -69,7 +65,7 @@ const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 var svg = d3.select('svg');
 
 // for plotting points
-const xValue = d => d.Order;
+const xValue = d => d.X;
 
 // axes
 //var xAxis = d3.axisBottom(xScale);
@@ -124,48 +120,16 @@ var chart = svg.append("g")
 // function to draw lines and points given inputData
 // Note: currently does not support .exit() functionality
 function redraw(inputData) {
-  // chart.selectAll("line").remove();
-  // chart.selectAll("circle").remove();
-  console.log("redrawing:", inputData);
   if (typeof inputData !== 'undefined') {
-    // update X-axis to scale based on inputData
-    // find the min and max ID for this input selection
-    // var athleteMinID = _.min(inputData.values, function (item) {
-    //   return item.ID;
-    // });
-    // var athleteMaxID = _.max(inputData.values, function (item) {
-    //   return item.ID;
-    // });
-    // minID = athleteMinID.ID;
-    // maxID = athleteMaxID.ID;
-
-    // min order temporarily in here
-
-    // var athleteMinOrder = _.min(inputData.values, function (item) {
-    //   // console.log(item.Order);
-    //   return item.Order;
-    // });
-    // var athleteMaxOrder = _.max(inputData.values, function (item) {
-    //   // console.log(item.Order);
-    //   return item.Order;
-    // });
-    // minOrder = athleteMinOrder.Order;
-    // maxOrder = athleteMaxOrder.Order;
-    //
-    // console.log("this is the minOrder", minOrder);
-    // console.log("this is the maxOrder", maxOrder);
 
     // update the X-axis
-    xScale.domain([minOrder, maxOrder]);
+    xScale.domain([minAlphaOrder, maxAlphaOrder]);
     xAxisGroup.transition().call(xAxis);
 
     chart.append("g").selectAll("line").data(inputData.values)
       .enter()
       .append("line")
-      // .attr("id", "l" + inputData.key)
       .style("stroke", function (d) {
-        // console.log("inputData inside line", inputData)
-        // console.log("d inside line", d)
         return colorScale(d[colorColumn]);
       })
       .style("stroke-width", 1)
@@ -184,7 +148,6 @@ function redraw(inputData) {
     chart.append("g").selectAll('circle').data(inputData.values)
       .enter()
       .append('circle')
-      // .attr("id", "c" + inputData.key)
       .attr("cx", function (d) {
         return xScale(d[xColumn]);
       })
@@ -198,7 +161,6 @@ function redraw(inputData) {
       .attr("label", function (d) {
         return d.Name
       })
-      //.attr(circleAttrs)
       .on("mouseover", function (d) {
         // circle gets bigger
         d3.select(this)
@@ -234,7 +196,7 @@ function redraw(inputData) {
           .attr("fill", function(d) {
             return colorScale(d[colorColumn]);
           });
-        //Remove the tooltip
+        // Remove the tooltip
         d3.select("#tooltip").remove();
       })
       .on("click", function (d) {
@@ -328,23 +290,22 @@ function setupNOCFiltering(data) {
 
     chart.selectAll("line").remove();
     chart.selectAll("circle").remove();
-    // console.log("entriesByNOC[selectedValues[i]]", entriesByNOC[selectedValues[0]]);
 
-    // iterate through data, remove the things with the selected NOCs
+    // get the X ordering which is how we want to display
+    // the points on the graph (dependent on the last name ordering each iteration)
     var hold = [];
-    minOrder = 0;
-    maxOrder = 0;
+    minAlphaOrder = 0;
+    maxAlphaOrder = 0;
     for (var i = 0; i < selectedValues.length; i++) {
       var unique = d3.nest()
         .key(function(d) {
           return d.Order; })
         .entries(entriesByNOC[selectedValues[i]].values);
-      maxOrder += unique.length;
+      maxAlphaOrder += unique.length;
 
       console.log("unique:", unique);
       unique.forEach(function(d) {
         hold.push(d);
-        //console.log("printing out each", d.values[0]);
       });
     }
 
@@ -358,10 +319,6 @@ function setupNOCFiltering(data) {
       index++;
     })
 
-    // console.log("total size:", size);
-    // console.log("hold values:", hold);
-    console.log("sorted hold:", sorted);
-
     var cleaned = [];
     sorted.forEach(function(d) {
       d.values.forEach(function(e) {
@@ -374,85 +331,11 @@ function setupNOCFiltering(data) {
         return d.NOC; })
       .entries(cleaned);
 
-    console.log("byNOC", byNOC);
-    console.log("selected values", entriesByNOC[selectedValues[0]]);
-
-    // var nodes = byNOC.map(function(node, index) {
-    //   // console.log("data", data);
-    //   // console.log("node", node);
-    //   return {
-    //     index: index,
-    //     value: node,
-    //     size: circleRadius,
-    //     x: xScale(node[xColumn]),
-    //     fx: yScale(node[yColumn]),
-    //   };
-    // });
-
     for (var i = 0; i < selectedValues.length; i++) {
       redraw(filterByMedal(byNOC[i], medalCounts, medalRange[0], medalRange[1]));
     }
 
-    // maxOrder = -Number.MAX_VALUE;
-    // minOrder = Number.MAX_VALUE;
-    //
-    // for (var i = 0; i < selectedValues.length; i++) {
-    //   var athleteMinOrder = _.min(entriesByNOC[selectedValues[i]].values, function (item) {
-    //     return item.Order;
-    //   });
-    //   var athleteMaxOrder = _.max(entriesByNOC[selectedValues[i]].values, function (item) {
-    //     return item.Order;
-    //   });
-    //
-    //   if (athleteMaxOrder.Order > maxOrder) {
-    //     maxOrder = athleteMaxOrder.Order;
-    //   }
-    //
-    //   if (athleteMinOrder.Order < minOrder) {
-    //     minOrder = athleteMinOrder.Order;
-    //   }
-    //
-    //   console.log("max order selected", maxOrder);
-    //   console.log("min order selected", minOrder);
-    //
-    // }
-
-    // for (var i = 0; i < selectedValues.length; i++) {
-    //   console.log("drawing: ", i);
-    //   redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medals));
-    // }
-
-    // if (selectedValues.length > currentNOCs.length) {
-    //   // we added a value so the current NOCs have to be updated
-    //   var intersect = _.difference(selectedValues, currentNOCs);
-    //   currentNOCs.push(intersect[0]);
-    //   redraw(filterByMedal(entriesByNOC[intersect[0]], medalCounts, medals));
-    // } else if (selectedValues.length == currentNOCs.length) {
-    //   removeData(entriesByNOC[currentNOCs[0]].key);
-    //   redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
-    //   currentNOCs = [];
-    //   currentNOCs.push(this.value);
-    // } else {
-    //   // we removed a value so current NOCs have to be updated
-    //   var intersect = _.difference(currentNOCs, selectedValues);
-    //   for (var i = 0; i < intersect.length; i++) {
-    //     var index = currentNOCs.indexOf(intersect[i]);
-    //     currentNOCs.splice(index, 1);
-    //     removeData(entriesByNOC[intersect[i]].key);
-    //   }
-    //   redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
-    //   currentNOCs.push(this.value);
-    //   //removeData(entriesByNOC[intersect[0]].key);
-    // }
-
-    console.log('You selected: ', this.value);
   });
-}
-
-// lets us remove the circles and lines that we don't need
-function removeData(value) {
-  svg.selectAll("#c" + value).remove();
-  svg.selectAll("#l" + value).remove();
 }
 
 // function to setup Medal Filtering
