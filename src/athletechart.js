@@ -12,6 +12,7 @@ const _ = require("underscore");
 export function generateAthleteChart(data) {
 
     const containsYear = (groups, year) => {
+        console.log("ehlo")
         return _.find(d3.values(groups), function(item) {
             return item.key === year;
         });
