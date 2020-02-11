@@ -49,6 +49,11 @@ var entriesByStartThenName;
 // lists all NOCs
 var NOCs = [];
 
+var force = d3.layout.force()
+  .gravity(0.05)
+  .distance(100)
+  .charge(-100)
+  .size([circleRadius * 2, circleRadius * 2]);
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -373,6 +378,8 @@ function setupNOCFiltering(data) {
     console.log("byNOC", byNOC);
     console.log("selected values", entriesByNOC[selectedValues[0]]);
 
+
+
     peopleNames = [];
     for (var i = 0; i < selectedValues.length; i++) {
       console.log("drawing: ", i);
@@ -498,7 +505,7 @@ function autocomplete(input) {
     var a, b, val = this.value;
     /*close any already open lists of autocompleted values*/
     closeAllLists();
-    if (!val) { 
+    if (!val) {
       return false;
     }
     currentFocus = -1;
@@ -597,7 +604,7 @@ function autocomplete(input) {
   document.addEventListener("click", function (e) {
       closeAllLists(e.target);
   });
-} 
+}
 
 // function to generate individual athlete chart
 // as a bar chart of medals over time
