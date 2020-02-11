@@ -657,8 +657,8 @@ function generateAthleteChart(data) {
   smallsvg.selectAll("text").remove();
   smallsvg.selectAll("g").transition();//.delay(5000);
 
-  var smallWidth = 800;
-  var smallHeight = 500;
+  var smallWidth = 500;
+  var smallHeight = 400;
 
   var smallMargin = {
       left: 60,
@@ -686,9 +686,10 @@ function generateAthleteChart(data) {
     }
 
     const xSmallAxis = d3.axisBottom(xSmallScale)
-        .tickPadding(30)
+        .tickPadding(15)
         .tickValues(getTickValues(+data[0].Start, +data[0].End))
         .tickFormat(d3.format("Y"))
+        .tickSize(0);
         // .tickSize(-innerSmallHeight);
     const ySmallAxis = d3.axisLeft(ySmallScale)
         .tickSize(-innerSmallWidth);
@@ -744,7 +745,7 @@ function generateAthleteChart(data) {
 
     smallsvg.append("text")
         .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
-        .attr("transform", "translate("+ (smallWidth/2) +","+(smallHeight)+")")  // centre below axis
+        .attr("transform", "translate("+ (smallWidth/2) +","+(smallHeight - 10)+")")  // centre below axis
         .text("Year Competed");
 
     data.forEach(function(d) {
