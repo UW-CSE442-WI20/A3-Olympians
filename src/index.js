@@ -49,11 +49,9 @@ var entriesByStartThenName;
 // lists all NOCs
 var NOCs = [];
 
-var force = d3.layout.force()
-  .gravity(0.05)
-  .distance(100)
-  .charge(-100)
-  .size([circleRadius * 2, circleRadius * 2]);
+var padding = 2,
+    maxRadius = 30,
+    minRadius = 2
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -167,6 +165,8 @@ function redraw(inputData) {
       .append("line")
       // .attr("id", "l" + inputData.key)
       .style("stroke", function (d) {
+        // console.log("inputData inside line", inputData)
+        // console.log("d inside line", d)
         return colorScale(d[colorColumn]);
       })
       .style("stroke-width", 1)
@@ -378,9 +378,27 @@ function setupNOCFiltering(data) {
     console.log("byNOC", byNOC);
     console.log("selected values", entriesByNOC[selectedValues[0]]);
 
+    var nodes = byNOC.map(function(node, index) {
+      // console.log("data", data);
+      // console.log("node", node);
+      return {
+        index: index,
+        value: node,
+        size: circleRadius,
+        x: xScale(node[xColumn]),
+        fx: yScale(node[yColumn]),
+      };
+    });
 
+    var simulation = d3.forceSimulation(nodes)
+      .force("y", d3.forceY(250))
+      .force("collide", d3.forceCollide().radius(circleRadius + padding))
+      .force("manyBody", d3.forceManyBody().strength(-10))
+      .stop();
 
-    peopleNames = [];
+    for (var i = 0; i < 150; ++i) simulation.tick();
+
+    console.log("format of nodes", nodes);
     for (var i = 0; i < selectedValues.length; i++) {
       console.log("drawing: ", i);
       redraw(filterByMedal(byNOC[i], medalCounts, medals));
@@ -890,4 +908,5 @@ d3.csv(csvFile).then(function (data) {
   // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
   autocomplete(document.getElementById("searchbar"));
+
 });
