@@ -36,7 +36,7 @@ const csvFile = require('../data/olympic_overall.csv');
 
 var medalCounts;
 var maxMedals;
-var selectedValues;
+var selectedValues = [];
 var peopleNames = [];
 // data structures to be loaded in
 
@@ -480,12 +480,16 @@ function filterByMedal(data, medalCounts, nMedals) {
   for (var person in medalCounts) {
     if (medalCounts[person] >= nMedals) {
       currMedals.push(person);
-      peopleNames.push(person);
     }
   }
   let currPeople = _.filter(data.values, (item) => {
-    return _.indexOf(currMedals, item.Name) >= 0;
+    const hasEnoughMedals = _.indexOf(currMedals, item.Name) >= 0;
+    if (hasEnoughMedals) {
+      peopleNames.push(item.Name);
+    }
+    return hasEnoughMedals;
   });
+  peopleNames =  _.uniq(peopleNames, true);
   currPeople = d3.nest()
     .key(function () {
       return data.key;
