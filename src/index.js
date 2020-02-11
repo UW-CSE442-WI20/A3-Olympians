@@ -312,6 +312,7 @@ function setupNOCFiltering(data) {
         minOrder = athleteMinOrder.Order;
       }
     }
+    peopleNames = [];
     for (var i = 0; i < selectedValues.length; i++) {
       redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]));
     }
@@ -319,25 +320,6 @@ function setupNOCFiltering(data) {
 
   });
 }
-
-// function to setup Medal Filtering
-// function setupMedalFiltering(data) {
-//   // populate dropdown with range of medals
-//   var medalsDD = document.getElementById("numMedals");
-//   for (let i = 1; i <= maxMedals; i++) {
-//     medalsDD.options[medalsDD.options.length] = new Option(i, i);
-//   }
-//
-//   d3.select("#numMedals")
-//     .on("input", function () {
-//       chart.selectAll("line").remove();
-//       chart.selectAll("circle").remove();
-//       peopleNames = [];
-//       for (let i = 0; i < selectedValues.length; i++) {
-//         redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, this.value));
-//       }
-//     });
-// }
 
 // function that returns the dataset with only the rows
 // containing the people with more than nMedals medals
