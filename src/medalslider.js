@@ -6,11 +6,10 @@
 
 const d3 = require("d3");
 
-export function timeslider(min, max) {
+export function medalslider(min, max) {
   var myrange = [min, max + 1];
-  var slidervalues = [1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932,
-    1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980,
-    1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016];
+  //var slidervalues = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,
+  //  15,16,17,18,19,20,21,22,23,24,25,26,27,28];
   // set width and height of slider control
   var w = 400;
   var h = 300;
@@ -24,7 +23,7 @@ export function timeslider(min, max) {
      .range([0, width]);  // display space
 
   // create translated g
-  const g = d3.select("#timeSlider")
+  const g = d3.select("#medalSlider")
     .append('g')
     .attr('transform', "translate(60,0)");
 
@@ -55,8 +54,9 @@ export function timeslider(min, max) {
       .on('brush', function() {
         var s = d3.event.selection;
         var svg = d3.select('svg');
-        var val = s.map(d => Math.round(x.invert(d)));
-        svg.node().value = determineYear(val, slidervalues);
+        svg.node().value = s.map(d => Math.round(x.invert(d)));
+        console.log(svg.node().value);
+        //svg.node().value = determineYear(val, slidervalues);
       // update and move labels
       labelL.attr('x', s[0])
         .text(svg.node().value[0]);
@@ -72,7 +72,7 @@ export function timeslider(min, max) {
         // move these two lines into the on('end') part below
         svg.node().dispatchEvent(new CustomEvent("input"));
         let event = new Event("change");
-        eventHandler.dispatchEvent(event);
+        medalsEventHandler.dispatchEvent(event);
       })
 
     // append brush to g
@@ -121,8 +121,8 @@ export function timeslider(min, max) {
 
     var getRange = function() {
       var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
-      range = determineYear(range, slidervalues);
-      //console.log("RANGE ", range);
+      //range = determineYear(range, slidervalues);
+      console.log("RANGE ", range);
       return range }
 
      return {getRange: getRange}
@@ -130,21 +130,21 @@ export function timeslider(min, max) {
 
 //// HELPER FUNCTION
 //// Round slider value to the nearest valid Olympic year
-  function determineYear(val, slidervalues) {
-    // get start year
-    for (let i = 0; i < slidervalues.length; i++) {
-      if (Math.abs(slidervalues[i] - val[0]) <= 3) {
-        val[0] = slidervalues[i];
-        break;
-      }
-    }
-    // get end year
-    for (let i = 0; i < slidervalues.length; i++) {
-      if (Math.abs(slidervalues[i] - val[1]) <= 3) {
-
-        val[1] = slidervalues[i];
-        break;
-      }
-    }
-    return val;
-  }
+  // function determineYear(val, slidervalues) {
+  //   // get start year
+  //   for (let i = 0; i < slidervalues.length; i++) {
+  //     if (Math.abs(slidervalues[i] - val[0]) <= 3) {
+  //       val[0] = slidervalues[i];
+  //       break;
+  //     }
+  //   }
+  //   // get end year
+  //   for (let i = 0; i < slidervalues.length; i++) {
+  //     if (Math.abs(slidervalues[i] - val[1]) <= 3) {
+  //
+  //       val[1] = slidervalues[i];
+  //       break;
+  //     }
+  //   }
+  //   return val;
+  // }

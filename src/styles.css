@@ -10,9 +10,9 @@ body {
   grid-template-areas:
     "header header header"
     "content content smallchart"
-    "sidebar sidebar sidebar"
+    "sidebar sidebar sidebar";
     /*"smallchart smallchart"*/
-    "footer footer footer";
+    /*"footer footer footer";
   /*height: 600px;**/
 }
 
