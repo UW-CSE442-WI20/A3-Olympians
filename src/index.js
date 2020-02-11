@@ -20,13 +20,17 @@ var margin = {
 var innerWidth = outerWidth - margin.left - margin.right;
 var innerHeight = outerHeight - margin.top - margin.bottom;
 var circleRadius = 3;
-var xColumn = "ID";
+var xColumn = "X";
 var yColumn = "Year";
 var colorColumn = "NOC"; // color of circles based on athlete NOC
 var startYear = 1896;
 var endYear = 2016;
-var minID = 0;
-var maxID = 135000;
+// var minID = 0;
+// var maxID = 135000;
+
+var minOrder = 0;
+var maxOrder = 8760;
+
 var currentNOCs = [];
 
 const csvFile = require('../data/olympic_overall.csv');
@@ -36,6 +40,7 @@ var medalRange = [1, 28];  // [minMedals, maxMedals]
 // var minMedals;
 // var maxMedals;
 var selectedValues;
+var peopleNames = [];
 // data structures to be loaded in
 
 // make the Name the key
@@ -55,7 +60,9 @@ var NOCs = [];
 ///////////////////////////////////////////////////////
 
 
-const xScale = d3.scaleLinear().domain([minID, maxID]).range([margin["left"], innerWidth]);
+// const xScale = d3.scaleLinear().domain([minID, maxID]).range([margin["left"], innerWidth]);
+const xScale = d3.scaleLinear().domain([minOrder, maxOrder]).range([margin["left"], innerWidth]);
+
 //const xScale = d3.scalePoint().range([margin["left"], innerWidth]);
 const yScale = d3.scaleTime().domain([startYear, endYear]).range([margin["bottom"], innerHeight]);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -64,12 +71,15 @@ const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 var svg = d3.select('svg');
 
 // for plotting points
-const xValue = d => d.ID;
+const xValue = d => d.Order;
 
 // axes
 //var xAxis = d3.axisBottom(xScale);
 var xAxis = d3.axisBottom(xScale)
-  .tickPadding(30);
+  .tickPadding(30)
+  .tickValues([500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000,
+  5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000
+])
 var yAxis = d3.axisLeft(yScale)
   .tickValues([1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932,
     1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980,
@@ -122,22 +132,39 @@ function redraw(inputData) {
   if (typeof inputData !== 'undefined') {
     // update X-axis to scale based on inputData
     // find the min and max ID for this input selection
-    var athleteMinID = _.min(inputData.values, function (item) {
-      return item.ID;
-    });
-    var athleteMaxID = _.max(inputData.values, function (item) {
-      return item.ID;
-    });
-    minID = athleteMinID.ID;
-    maxID = athleteMaxID.ID;
+    // var athleteMinID = _.min(inputData.values, function (item) {
+    //   return item.ID;
+    // });
+    // var athleteMaxID = _.max(inputData.values, function (item) {
+    //   return item.ID;
+    // });
+    // minID = athleteMinID.ID;
+    // maxID = athleteMaxID.ID;
+
+    // min order temporarily in here
+
+    // var athleteMinOrder = _.min(inputData.values, function (item) {
+    //   // console.log(item.Order);
+    //   return item.Order;
+    // });
+    // var athleteMaxOrder = _.max(inputData.values, function (item) {
+    //   // console.log(item.Order);
+    //   return item.Order;
+    // });
+    // minOrder = athleteMinOrder.Order;
+    // maxOrder = athleteMaxOrder.Order;
+    //
+    // console.log("this is the minOrder", minOrder);
+    // console.log("this is the maxOrder", maxOrder);
+
     // update the X-axis
-    xScale.domain([minID, maxID]);
+    xScale.domain([minOrder, maxOrder]);
     xAxisGroup.transition().call(xAxis);
 
     chart.append("g").selectAll("line").data(inputData.values)
       .enter()
       .append("line")
-      .attr("id", "l" + inputData.key)
+      // .attr("id", "l" + inputData.key)
       .style("stroke", function (d) {
         return colorScale(d[colorColumn]);
       })
@@ -157,7 +184,7 @@ function redraw(inputData) {
     chart.append("g").selectAll('circle').data(inputData.values)
       .enter()
       .append('circle')
-      .attr("id", "c" + inputData.key)
+      // .attr("id", "c" + inputData.key)
       .attr("cx", function (d) {
         return xScale(d[xColumn]);
       })
@@ -236,6 +263,7 @@ function initializeDataStructures(data) {
     d.ID = +d.ID;
     d.Age = +d.Age;
     d.Year = +d.Year;
+    d.Order = +d.Order;
   });
 
   // make the name the key
@@ -320,11 +348,124 @@ function setupNOCFiltering(data) {
       }
       redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medalRange[0], medalRange[1]));//medals));
       //removeData(entriesByNOC[intersect[0]].key);
+      }
     }
+  }
+// FROM MERGE //
+    // chart.selectAll("line").remove();
+    // chart.selectAll("circle").remove();
+    // // console.log("entriesByNOC[selectedValues[i]]", entriesByNOC[selectedValues[0]]);
+    //
+    // // iterate through data, remove the things with the selected NOCs
+    // var hold = [];
+    // minOrder = 0;
+    // maxOrder = 0;
+    // for (var i = 0; i < selectedValues.length; i++) {
+    //   var unique = d3.nest()
+    //     .key(function(d) {
+    //       return d.Order; })
+    //     .entries(entriesByNOC[selectedValues[i]].values);
+    //   maxOrder += unique.length;
+    //
+    //   console.log("unique:", unique);
+    //   unique.forEach(function(d) {
+    //     hold.push(d);
+    //     //console.log("printing out each", d.values[0]);
+    //   });
+    // }
+  //// END OF FROM MERGE
 
-    console.log('You selected: ', this.value);
-  });
-}
+    //
+    // var sorted = hold.sort((a,b) =>  a.key - b.key)
+    //
+    // index = 0;
+    // sorted.forEach(function(d) {
+    //   d.values.forEach(function(e) {
+    //     e.X = index;
+    //   })
+    //   index++;
+    // })
+    //
+    // // console.log("total size:", size);
+    // // console.log("hold values:", hold);
+    // console.log("sorted hold:", sorted);
+    //
+    // var cleaned = [];
+    // sorted.forEach(function(d) {
+    //   d.values.forEach(function(e) {
+    //     cleaned.push(e);
+    //   })
+    // })
+    //
+    // var byNOC = d3.nest()
+    //   .key(function(d) {
+    //     return d.NOC; })
+    //   .entries(cleaned);
+    //
+    // console.log("byNOC", byNOC);
+    // console.log("selected values", entriesByNOC[selectedValues[0]]);
+    //
+    // peopleNames = [];
+    // for (var i = 0; i < selectedValues.length; i++) {
+    //   console.log("drawing: ", i);
+    //   redraw(filterByMedal(byNOC[i], medalCounts, medals));
+  //  }
+
+    // maxOrder = -Number.MAX_VALUE;
+    // minOrder = Number.MAX_VALUE;
+    //
+    // for (var i = 0; i < selectedValues.length; i++) {
+    //   var athleteMinOrder = _.min(entriesByNOC[selectedValues[i]].values, function (item) {
+    //     return item.Order;
+    //   });
+    //   var athleteMaxOrder = _.max(entriesByNOC[selectedValues[i]].values, function (item) {
+    //     return item.Order;
+    //   });
+    //
+    //   if (athleteMaxOrder.Order > maxOrder) {
+    //     maxOrder = athleteMaxOrder.Order;
+    //   }
+    //
+    //   if (athleteMinOrder.Order < minOrder) {
+    //     minOrder = athleteMinOrder.Order;
+    //   }
+    //
+    //   console.log("max order selected", maxOrder);
+    //   console.log("min order selected", minOrder);
+    //
+    // }
+
+    // for (var i = 0; i < selectedValues.length; i++) {
+    //   console.log("drawing: ", i);
+    //   redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medals));
+    // }
+
+    // if (selectedValues.length > currentNOCs.length) {
+    //   // we added a value so the current NOCs have to be updated
+    //   var intersect = _.difference(selectedValues, currentNOCs);
+    //   currentNOCs.push(intersect[0]);
+    //   redraw(filterByMedal(entriesByNOC[intersect[0]], medalCounts, medals));
+    // } else if (selectedValues.length == currentNOCs.length) {
+    //   removeData(entriesByNOC[currentNOCs[0]].key);
+    //   redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
+    //   currentNOCs = [];
+    //   currentNOCs.push(this.value);
+    // } else {
+    //   // we removed a value so current NOCs have to be updated
+    //   var intersect = _.difference(currentNOCs, selectedValues);
+    //   for (var i = 0; i < intersect.length; i++) {
+    //     var index = currentNOCs.indexOf(intersect[i]);
+    //     currentNOCs.splice(index, 1);
+    //     removeData(entriesByNOC[intersect[i]].key);
+    //   }
+    //   redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medals));
+    //   currentNOCs.push(this.value);
+    //   //removeData(entriesByNOC[intersect[0]].key);
+    // }
+
+    //console.log('You selected: ', this.value);
+  //});
+//}
 
 // lets us remove the circles and lines that we don't need
 function removeData(value) {
@@ -343,6 +484,7 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
   for (var person in medalCounts) {
     if (medalCounts[person] >= minMedals && medalCounts[person] <= maxMedals) {
       currMedals.push(person);
+      peopleNames.push(person);
     }
   }
   let currPeople = _.filter(data.values, (item) => {
@@ -376,6 +518,118 @@ function initializeMedalSlider() {
         }
       }
     });
+}
+
+function autocomplete(input) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  input.addEventListener("input", function(e) {
+    // a is the autocomplete outer div element
+    // b is the temporary variable used to store each option in the div
+    var a, b, val = this.value;
+    /*close any already open lists of autocompleted values*/
+    closeAllLists();
+    if (!val) {
+      return false;
+    }
+    currentFocus = -1;
+    /*create a DIV element that will contain the items (values):*/
+    a = document.createElement("DIV");
+    a.setAttribute("id", this.id + "autocomplete-list");
+    a.setAttribute("class", "autocomplete-items");
+    /*append the DIV element as a child of the autocomplete container:*/
+    this.parentNode.appendChild(a);
+    /*for each item in the array...*/
+    for (var i = 0; i < peopleNames.length; i++) {
+      /*check if the item starts with the same letters as the text field value:*/
+      if (peopleNames[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+        /*create a DIV element for each matching element:*/
+        b = document.createElement("DIV");
+        /*make the matching letters bold:*/
+        b.innerHTML = "<strong>" + peopleNames[i].substr(0, val.length) + "</strong>";
+        b.innerHTML += peopleNames[i].substr(val.length);
+        /*insert a input field that will hold the current array item's value:*/
+        b.innerHTML += "<input type='hidden' value='" + peopleNames[i] + "'>";
+        /*execute a function when someone clicks on the item value (DIV element):*/
+        b.addEventListener("click", function(e) {
+          /*insert the value for the autocomplete text field:*/
+          input.value = this.getElementsByTagName("input")[0].value;
+          /*close the list of autocompleted values,
+          (or any other open lists of autocompleted values:*/
+          closeAllLists();
+          generateAthleteChart( _.find(d3.values(entriesByName), function (item) { return item.key === input.value; }).values);
+        });
+        a.appendChild(b);
+      }
+    }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  input.addEventListener("keydown", function(e) {
+    var currSuggestion = document.getElementById(this.id + "autocomplete-list");
+    if (currSuggestion) {
+      currSuggestion = currSuggestion.getElementsByTagName("div");
+    }
+    if (e.keyCode == 40) {
+      /*If the arrow DOWN key is pressed,
+      increase the currentFocus variable:*/
+      currentFocus++;
+      /*and and make the current item more visible:*/
+      addActive(currSuggestion);
+    } else if (e.keyCode == 38) { //up
+      /*If the arrow UP key is pressed,
+      decrease the currentFocus variable:*/
+      currentFocus--;
+      /*and and make the current item more visible:*/
+      addActive(currSuggestion);
+    } else if (e.keyCode == 13) {
+      /*If the ENTER key is pressed, prevent the form from being submitted,*/
+      e.preventDefault();
+      if (currentFocus > -1) {
+        /*and simulate a click on the "active" item:*/
+        if (currSuggestion) {
+          currSuggestion[currentFocus].click();
+        }
+      }
+    }
+  });
+  function addActive(item) {
+    /*a function to classify an item as "active":*/
+    if (!item) {
+      return false;
+    }
+    /*start by removing the "active" class on all items:*/
+    removeActive(item);
+    if (currentFocus >= item.length) {
+      currentFocus = 0;
+    }
+    if (currentFocus < 0) {
+      currentFocus = (item.length - 1);
+    }
+    /*add class "autocomplete-active":*/
+    item[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(item) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < item.length; i++) {
+      item[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != input) {
+        x[i].parentNode.removeChild(x[i]);
+      }
+    }
+  }
+  /*execute a function when someone clicks in the document:*/
+  document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
+  });
 }
 
 // function to generate individual athlete chart
@@ -659,4 +913,5 @@ d3.csv(csvFile).then(function (data) {
   initializeMedalSlider();
   // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
+  autocomplete(document.getElementById("searchbar"));
 });
