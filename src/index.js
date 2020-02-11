@@ -50,9 +50,6 @@ var entriesByStartThenName;
 // lists all NOCs
 var NOCs = [];
 
-var padding = 2,
-    maxRadius = 30,
-    minRadius = 2
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -379,29 +376,19 @@ function setupNOCFiltering(data) {
     console.log("byNOC", byNOC);
     console.log("selected values", entriesByNOC[selectedValues[0]]);
 
-    var nodes = byNOC.map(function(node, index) {
-      // console.log("data", data);
-      // console.log("node", node);
-      return {
-        index: index,
-        value: node,
-        size: circleRadius,
-        x: xScale(node[xColumn]),
-        fx: yScale(node[yColumn]),
-      };
-    });
+    // var nodes = byNOC.map(function(node, index) {
+    //   // console.log("data", data);
+    //   // console.log("node", node);
+    //   return {
+    //     index: index,
+    //     value: node,
+    //     size: circleRadius,
+    //     x: xScale(node[xColumn]),
+    //     fx: yScale(node[yColumn]),
+    //   };
+    // });
 
-    var simulation = d3.forceSimulation(nodes)
-      .force("y", d3.forceY(250))
-      .force("collide", d3.forceCollide().radius(circleRadius + padding))
-      .force("manyBody", d3.forceManyBody().strength(-10))
-      .stop();
-
-    for (var i = 0; i < 150; ++i) simulation.tick();
-
-    console.log("format of nodes", nodes);
     for (var i = 0; i < selectedValues.length; i++) {
-      console.log("drawing: ", i);
       redraw(filterByMedal(byNOC[i], medalCounts, medalRange[0], medalRange[1]));
     }
 
