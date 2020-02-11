@@ -37,9 +37,8 @@ const csvFile = require('../data/olympic_overall.csv');
 
 var medalCounts;
 var medalRange = [1, 28];  // [minMedals, maxMedals]
-// var minMedals;
-// var maxMedals;
-var selectedValues;
+//var maxMedals;
+var selectedValues = [];
 var peopleNames = [];
 // data structures to be loaded in
 
@@ -128,7 +127,6 @@ function redraw(inputData) {
   // chart.selectAll("line").remove();
   // chart.selectAll("circle").remove();
   console.log("redrawing:", inputData);
-
   if (typeof inputData !== 'undefined') {
     // update X-axis to scale based on inputData
     // find the min and max ID for this input selection
@@ -245,7 +243,7 @@ function redraw(inputData) {
           // console.log("searching for: " + d.Name);
           return item.key === d.Name;
         });
-        //console.log("result: " + athleteData.values);
+        console.log("result: " + athleteData.values);
 
         athleteData.values.forEach(function (element) {
           console.log(element);
@@ -325,91 +323,63 @@ function setupNOCFiltering(data) {
     var selectedOptions = activities.selectedOptions || [].filter.call(activities.options, option => option.selected);
     selectedValues = [].map.call(selectedOptions, option => option.value);
     //var medals = document.getElementById('numMedals').value;
-    // medals is now a range [min, max] = medalRange (global variable)
-    //var medals = document.getElementById('medalSlider')
 
-    if (selectedValues.length > currentNOCs.length) {
-      // we added a value so the current NOCs have to be updated
-      var intersect = _.difference(selectedValues, currentNOCs);
-      currentNOCs.push(intersect[0]);
-      redraw(filterByMedal(entriesByNOC[intersect[0]], medalCounts, medalRange[0], medalRange[1]));//medals));
-    } else if (selectedValues.length == currentNOCs.length) {
-      removeData(entriesByNOC[currentNOCs[0]].key);
-      redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medalRange[0], medalRange[1]));//medals));
-      currentNOCs = [];
-      currentNOCs.push(this.value);
-    } else {
-      // we removed a value so current NOCs have to be updated
-      var intersect = _.difference(currentNOCs, selectedValues);
-      for (var i = 0; i < intersect.length; i++) {
-        var index = currentNOCs.indexOf(intersect[i]);
-        currentNOCs.splice(index, 1);
-        removeData(entriesByNOC[intersect[i]].key);
-      }
-      redraw(filterByMedal(entriesByNOC[this.value], medalCounts, medalRange[0], medalRange[1]));//medals));
-      //removeData(entriesByNOC[intersect[0]].key);
-      }
+    chart.selectAll("line").remove();
+    chart.selectAll("circle").remove();
+    // console.log("entriesByNOC[selectedValues[i]]", entriesByNOC[selectedValues[0]]);
+
+    // iterate through data, remove the things with the selected NOCs
+    var hold = [];
+    minOrder = 0;
+    maxOrder = 0;
+    for (var i = 0; i < selectedValues.length; i++) {
+      var unique = d3.nest()
+        .key(function(d) {
+          return d.Order; })
+        .entries(entriesByNOC[selectedValues[i]].values);
+      maxOrder += unique.length;
+
+      console.log("unique:", unique);
+      unique.forEach(function(d) {
+        hold.push(d);
+        //console.log("printing out each", d.values[0]);
+      });
     }
-  }
-// FROM MERGE //
-    // chart.selectAll("line").remove();
-    // chart.selectAll("circle").remove();
-    // // console.log("entriesByNOC[selectedValues[i]]", entriesByNOC[selectedValues[0]]);
-    //
-    // // iterate through data, remove the things with the selected NOCs
-    // var hold = [];
-    // minOrder = 0;
-    // maxOrder = 0;
-    // for (var i = 0; i < selectedValues.length; i++) {
-    //   var unique = d3.nest()
-    //     .key(function(d) {
-    //       return d.Order; })
-    //     .entries(entriesByNOC[selectedValues[i]].values);
-    //   maxOrder += unique.length;
-    //
-    //   console.log("unique:", unique);
-    //   unique.forEach(function(d) {
-    //     hold.push(d);
-    //     //console.log("printing out each", d.values[0]);
-    //   });
-    // }
-  //// END OF FROM MERGE
 
-    //
-    // var sorted = hold.sort((a,b) =>  a.key - b.key)
-    //
-    // index = 0;
-    // sorted.forEach(function(d) {
-    //   d.values.forEach(function(e) {
-    //     e.X = index;
-    //   })
-    //   index++;
-    // })
-    //
-    // // console.log("total size:", size);
-    // // console.log("hold values:", hold);
-    // console.log("sorted hold:", sorted);
-    //
-    // var cleaned = [];
-    // sorted.forEach(function(d) {
-    //   d.values.forEach(function(e) {
-    //     cleaned.push(e);
-    //   })
-    // })
-    //
-    // var byNOC = d3.nest()
-    //   .key(function(d) {
-    //     return d.NOC; })
-    //   .entries(cleaned);
-    //
-    // console.log("byNOC", byNOC);
-    // console.log("selected values", entriesByNOC[selectedValues[0]]);
-    //
-    // peopleNames = [];
-    // for (var i = 0; i < selectedValues.length; i++) {
-    //   console.log("drawing: ", i);
-    //   redraw(filterByMedal(byNOC[i], medalCounts, medals));
-  //  }
+    var sorted = hold.sort((a,b) =>  a.key - b.key)
+
+    index = 0;
+    sorted.forEach(function(d) {
+      d.values.forEach(function(e) {
+        e.X = index;
+      })
+      index++;
+    })
+
+    // console.log("total size:", size);
+    // console.log("hold values:", hold);
+    console.log("sorted hold:", sorted);
+
+    var cleaned = [];
+    sorted.forEach(function(d) {
+      d.values.forEach(function(e) {
+        cleaned.push(e);
+      })
+    })
+
+    var byNOC = d3.nest()
+      .key(function(d) {
+        return d.NOC; })
+      .entries(cleaned);
+
+    console.log("byNOC", byNOC);
+    console.log("selected values", entriesByNOC[selectedValues[0]]);
+
+    peopleNames = [];
+    for (var i = 0; i < selectedValues.length; i++) {
+      console.log("drawing: ", i);
+      redraw(filterByMedal(byNOC[i], medalCounts, medalRange[0], medalRange[1]));
+    }
 
     // maxOrder = -Number.MAX_VALUE;
     // minOrder = Number.MAX_VALUE;
@@ -463,15 +433,34 @@ function setupNOCFiltering(data) {
     //   //removeData(entriesByNOC[intersect[0]].key);
     // }
 
-    //console.log('You selected: ', this.value);
-  //});
-//}
+    console.log('You selected: ', this.value);
+  });
+}
 
 // lets us remove the circles and lines that we don't need
 function removeData(value) {
   svg.selectAll("#c" + value).remove();
   svg.selectAll("#l" + value).remove();
 }
+
+// function to setup Medal Filtering
+// function setupMedalFiltering(data) {
+//   // populate dropdown with range of medals
+//   var medalsDD = document.getElementById("numMedals");
+//   for (let i = 1; i <= maxMedals; i++) {
+//     medalsDD.options[medalsDD.options.length] = new Option(i, i);
+//   }
+//
+//   d3.select("#numMedals")
+//     .on("input", function () {
+//       chart.selectAll("line").remove();
+//       chart.selectAll("circle").remove();
+//       peopleNames = [];
+//       for (let i = 0; i < selectedValues.length; i++) {
+//         redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, this.value));
+//       }
+//     });
+// }
 
 // function that returns the dataset with only the rows
 // containing the people with more than nMedals medals
@@ -519,6 +508,7 @@ function initializeMedalSlider() {
       }
     });
 }
+
 
 function autocomplete(input) {
   /*the autocomplete function takes two arguments,
@@ -850,7 +840,7 @@ function initializeTimeSlider() {
   updateTimeSlider([1896, 2016]);
   // when the input range changes, update the start and end years
   d3.select('#eventHandler').on('change', function () {
-    console.log("changed");
+    //console.log("changed");
     updateTimeSlider(mySlider.getRange());
   });
 }
