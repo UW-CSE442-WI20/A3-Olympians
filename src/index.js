@@ -312,6 +312,7 @@ function setupNOCFiltering(data) {
         minOrder = athleteMinOrder.Order;
       }
     }
+    peopleNames = [];
     for (var i = 0; i < selectedValues.length; i++) {
       redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]));
     }
