@@ -17,25 +17,28 @@
         <div class="grid-element sidebar">
           <div class="controls">
             <div id="eventHandler">
+              <p>Timeframe:</p>
               <svg id="timeSlider" width="500" height="40"></svg>
             </div>
             <div id="medalsEventHandler">
+              <p>Total Medal Count:</p>
               <svg id="medalSlider" width="500" height="40"></svg>
             </div>
             <div class="dropdown">
+              <p>Select an NOC:</p>
               <select id="select-NOC" multiple></select>
-              <p>NOC:</p>
             </div>
-            </div>
-            <div class="autocomplete">
-              <input id="searchbar" name="searchbar" type="text" class="searchbar" placeholder="Search"/>
-            </div>
-
-          </div>
         </div>
         <div class="grid-element smallchart">
            <svg id="small-chart" width="800" height="500"></svg>
         </div>
+
+      </div class="grid-element searchbar">
+          <div class="autocomplete">
+            <input id="searchbar" name="searchbar" type="text" class="searchbar" placeholder="Search"/>
+          </div>
+        </div>
+
       </div>
       <script src="./index.js"></script>
     </body>
