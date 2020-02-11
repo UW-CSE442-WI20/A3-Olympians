@@ -6,7 +6,7 @@
 
 const d3 = require("d3");
 
-export function slider(min, max) {
+export function timeslider(min, max) {
   var myrange = [min, max + 1];
   var slidervalues = [1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932,
     1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980,
@@ -122,7 +122,7 @@ export function slider(min, max) {
     var getRange = function() {
       var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
       range = determineYear(range, slidervalues);
-      console.log("RANGE ", range);
+      //console.log("RANGE ", range);
       return range }
 
      return {getRange: getRange}
