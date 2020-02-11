@@ -50,7 +50,7 @@ svg {
 .grid-container {
   display: grid;
   grid-template-areas:
-    "header searchbar searchbar"
+    "header searchbar smallchart"
     "content content smallchart"
     "content content smallchart"
     "sidebar sidebar sidebar";
@@ -59,7 +59,7 @@ svg {
 .grid-element.header {
   background-color: #FDFDFC;
   grid-area: header;
-  padding: 100;
+  padding: 50;
 }
 .grid-element.content {
   background-color: #FDFDFC;
@@ -80,13 +80,14 @@ svg {
 }
 
 .grid-element.searchbar {
-  background-color: #FCF9EC;
+  background-color: #FDFDFC;
   grid-area: searchbar;
   display: flex;
 }
 
 .controls {
-  display: inline-flex;
+  /* display: inline-flex; */
+  display: flex;
   padding: 0 5px;
 }
 
