@@ -6,7 +6,8 @@
 
 const d3 = require("d3");
 const _ = require("underscore");
-import { slider } from './timeslider';
+import { timeslider } from './timeslider';
+import { medalslider } from './medalslider';
 
 var outerWidth = 1200;
 var outerHeight = 800;
@@ -35,7 +36,7 @@ var currentNOCs = [];
 const csvFile = require('../data/olympic_overall.csv');
 
 var medalCounts;
-var maxMedals;
+var medalRange = [1, 28];  // [minMedals, maxMedals]
 var selectedValues = [];
 var peopleNames = [];
 // data structures to be loaded in
@@ -302,9 +303,9 @@ function initializeDataStructures(data) {
   });
 
   // find the maximum number of medals someone has
-  maxMedals = _.max(medalCounts, function (item) {
-    return item;
-  });
+  // maxMedals = _.max(medalCounts, function (item) {
+  //   return item;
+  // });
 }
 
 
@@ -325,7 +326,7 @@ function setupNOCFiltering(data) {
     var activities = document.getElementById('select-NOC');
     var selectedOptions = activities.selectedOptions || [].filter.call(activities.options, option => option.selected);
     selectedValues = [].map.call(selectedOptions, option => option.value);
-    var medals = document.getElementById('numMedals').value;
+    //var medals = document.getElementById('numMedals').value;
 
     chart.selectAll("line").remove();
     chart.selectAll("circle").remove();
@@ -401,7 +402,7 @@ function setupNOCFiltering(data) {
     console.log("format of nodes", nodes);
     for (var i = 0; i < selectedValues.length; i++) {
       console.log("drawing: ", i);
-      redraw(filterByMedal(byNOC[i], medalCounts, medals));
+      redraw(filterByMedal(byNOC[i], medalCounts, medalRange[0], medalRange[1]));
     }
 
     // maxOrder = -Number.MAX_VALUE;
@@ -467,36 +468,34 @@ function removeData(value) {
 }
 
 // function to setup Medal Filtering
-function setupMedalFiltering(data) {
-  // populate dropdown with range of medals
-  var medalsDD = document.getElementById("numMedals");
-  for (let i = 1; i <= maxMedals; i++) {
-    medalsDD.options[medalsDD.options.length] = new Option(i, i);
-  }
+// function setupMedalFiltering(data) {
+//   // populate dropdown with range of medals
+//   var medalsDD = document.getElementById("numMedals");
+//   for (let i = 1; i <= maxMedals; i++) {
+//     medalsDD.options[medalsDD.options.length] = new Option(i, i);
+//   }
+//
+//   d3.select("#numMedals")
+//     .on("input", function () {
+//       chart.selectAll("line").remove();
+//       chart.selectAll("circle").remove();
+//       peopleNames = [];
+//       for (let i = 0; i < selectedValues.length; i++) {
+//         redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, this.value));
+//       }
+//     });
+// }
 
-  d3.select("#numMedals")
-    .on("input", function () {
-      chart.selectAll("line").remove();
-      chart.selectAll("circle").remove();
-      peopleNames = [];
-      for (let i = 0; i < selectedValues.length; i++) {
-        redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, this.value));
-      }
-    });
-}
-
-/*
-  function that returns the dataset with values as the rows
-  containing the people with more than nMedals medals and
-  with key as the NOC
-  parameters: data - the full dataset,
-  medalCounts - count of all the medals for each person
-  nMedals - current number of medals
-*/
-function filterByMedal(data, medalCounts, nMedals) {
+// function that returns the dataset with only the rows
+// containing the people with more than nMedals medals
+// parameters: data - the full dataset,
+// medalCounts - count of all the medals for each person
+// minMedals - current min number of medals
+// maxMedals - current max number of medals
+function filterByMedal(data, medalCounts, minMedals, maxMedals) {
   let currMedals = [];
   for (var person in medalCounts) {
-    if (medalCounts[person] >= nMedals) {
+    if (medalCounts[person] >= minMedals && medalCounts[person] <= maxMedals) {
       currMedals.push(person);
     }
   }
@@ -515,6 +514,29 @@ function filterByMedal(data, medalCounts, nMedals) {
     .entries(currPeople);
   return currPeople[0];
 }
+
+// initialize the medalslider
+function initializeMedalSlider() {
+  var myMedalSlider = medalslider(1, 28);
+  medalRange = myMedalSlider.getRange();
+  // minMedals = medalRange[0];
+  // maxMedals = medalRange[1];
+  d3.select('#medalsEventHandler')
+    .on('change', function () {
+      // reset
+      chart.selectAll("circle").remove();
+      chart.selectAll("line").remove();
+      // get min and max medal medal counts
+      medalRange = myMedalSlider.getRange();
+      // redraw data within range selection
+      if (typeof selectedValues !== 'undefined') {
+        for (let i = 0; i < selectedValues.length; i++) {
+          redraw(filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]));
+        }
+      }
+    });
+}
+
 
 function autocomplete(input) {
   /*the autocomplete function takes two arguments,
@@ -841,7 +863,7 @@ function generateAthleteChart(data) {
 
 // initialize the timeslider
 function initializeTimeSlider() {
-  var mySlider = slider(1896, 2016);
+  var mySlider = timeslider(1896, 2016);
   // Initial start and end years
   updateTimeSlider([1896, 2016]);
   // when the input range changes, update the start and end years
@@ -886,7 +908,7 @@ function initializeOptions(data) {
   // Bin: For now, setupMedalFiltering has to be called before setupNOCFiltering
   // due to dependencies.
   // TODO: Bin fix this
-  setupMedalFiltering(data);
+  //setupMedalFiltering(data);
 
   setupNOCFiltering(data);
 }
@@ -905,6 +927,8 @@ d3.csv(csvFile).then(function (data) {
   //xScale.domain(data.map(xValue));
   // initialize timeSlider
   initializeTimeSlider();
+  // initialize medalSlider
+  initializeMedalSlider();
   // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
   autocomplete(document.getElementById("searchbar"));
