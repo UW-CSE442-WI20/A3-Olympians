@@ -4,7 +4,6 @@ body {
   display: flex;
   flex-basis: 100%;
   font-family: "Arial Black", Gadget, sans-serif;
-  fill: #293462;
   font-size: 75%;
   background: #FDFDFC;
 }
@@ -39,7 +38,7 @@ svg {
 
 .axis line {
   stroke: Gray;
-  opacity: .5;
+  /* opacity: 0.5; */
 }
 
 .axis text {
@@ -54,7 +53,7 @@ svg {
     "header searchbar searchbar"
     "content content smallchart"
     "content content smallchart"
-    "sidebar sidebar sidebar";
+    "sidebar sidebar smallchart";
 }
 
 .grid-element.header {
@@ -68,6 +67,7 @@ svg {
   display: flex;
 }
 .grid-element.sidebar {
+  text-align: center;
   background-color: none;
   grid-area: sidebar;
 }
@@ -76,6 +76,7 @@ svg {
   background-color: #FDFDFC;
   grid-area: smallchart;
   display: flex;
+  margin-bottom: 30px;
 }
 
 .grid-element.searchbar {
