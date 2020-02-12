@@ -230,6 +230,9 @@ function setupNOCFiltering(data) {
 // minMedals - current min number of medals
 // maxMedals - current max number of medals
 function filterByMedal(data, medalCounts, minMedals, maxMedals) {
+  if (typeof data === 'undefined') {
+    return undefined;
+  }
   let currMedals = [];
   for (var person in medalCounts) {
     if (medalCounts[person] >= minMedals && medalCounts[person] <= maxMedals) {
