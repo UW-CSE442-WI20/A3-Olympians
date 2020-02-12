@@ -31,7 +31,7 @@ export function generateAthleteChart(data) {
         var events = [];
         data.forEach(function (item) {
             if (item.Year === year && item.Medal === medal) {
-                events.push(item.Event);
+                events.push(item.Swim_Event);
             }
         })
         return events;
