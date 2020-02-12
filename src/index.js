@@ -257,7 +257,7 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
     }
     return hasEnoughMedals;
   });
-  peopleNames = _.uniq(peopleNames, true);
+  peopleNames = _.uniq(peopleNames, false);
   currPeople = d3.nest()
     .key(function() {
       return data.key;
@@ -278,6 +278,7 @@ function initializeMedalSlider() {
       // get min and max medal medal counts
       medalRange = myMedalSlider.getRange();
       // redraw data within range selection
+      peopleNames = [];
       if (typeof selectedValues !== 'undefined') {
         for (let i = 0; i < selectedValues.length; i++) {
           // var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
@@ -299,6 +300,7 @@ function initializeOlympicAmountSlider() {
       // get min and max medal medal counts
       olympicAmountRange = myOlympicAmountSlider.getRange();
       // redraw data within range selection
+      peopleNames = [];
       if (typeof selectedValues !== 'undefined') {
         for (let i = 0; i < selectedValues.length; i++) {
           redraw(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
