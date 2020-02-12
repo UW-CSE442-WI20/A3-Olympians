@@ -13,6 +13,9 @@ import {
   medalslider
 } from './medalslider';
 import {
+  olympicamountslider
+} from './olympicamountslider';
+import {
   generateAthleteChart
 } from './athletechart';
 
@@ -35,6 +38,8 @@ var {
 
   medalCounts,
   medalRange,
+  olympicAmountCounts,
+  olympicAmountRange,
   selectedValues,
   peopleNames,
   // data structures to be loaded in
@@ -131,6 +136,17 @@ function initializeDataStructures(data) {
     return item.Name;
   });
 
+
+  const uniqueYears = _.uniq(data, function(item) {
+    return item.Name + " " + item.Year;
+  })
+
+  olympicAmountCounts = _.countBy(uniqueYears, function(item) {
+    return item.Name;
+  })
+  console.log('1a');
+  console.log(olympicAmountCounts);
+
   // find the maximum number of medals someone has
   // maxMedals = _.max(medalCounts, function (item) {
   //   return item;
@@ -208,10 +224,10 @@ function setupNOCFiltering(data) {
     }
     peopleNames = [];
     for (var i = 0; i < selectedValues.length; i++) {
-      redrawWithAnimation(svg, chart, filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]),
+      var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
+      redrawWithAnimation(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
          entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
     }
-
   });
 }
 
@@ -268,11 +284,53 @@ function initializeMedalSlider() {
       // redraw data within range selection
       if (typeof selectedValues !== 'undefined') {
         for (let i = 0; i < selectedValues.length; i++) {
-          redraw(svg, chart, filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]),
+          var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
+          redraw(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
              entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
         }
       }
     });
+}
+
+// initialize the medalslider
+function initializeOlympicAmountSlider() {
+  var myOlympicAmountSlider = olympicamountslider(1, 8);
+  olympicAmountRange = myOlympicAmountSlider.getRange();
+  // minMedals = medalRange[0];
+  // maxMedals = medalRange[1];
+  d3.select('#olympicAmountEventHandler')
+    .on('change', function() {
+      // reset
+      chart.selectAll("circle")
+        .transition()
+        .style("opacity", 0)
+        .duration(500)
+        .remove();
+      chart.selectAll("line")
+        .transition()
+        .style("opacity", 0)
+        .duration(500)
+        .remove();
+      // get min and max medal medal counts
+      olympicAmountRange = myOlympicAmountSlider.getRange();
+      // redraw data within range selection
+      if (typeof selectedValues !== 'undefined') {
+        for (let i = 0; i < selectedValues.length; i++) {
+          // var amountFilter = filterByMedal(entriesByNOC[selectedValues[i]], olympicAmountCounts, olympicAmountRange[0], olympicAmountRange[1]);
+          // console.log(amountFilter);
+          redraw(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
+             entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
+        }
+      }
+    });
+}
+
+function filterAll (data) {
+  var medalsFiltered = filterByMedal(data, medalCounts, medalRange[0], medalRange[1]);
+  console.log('yoyoyoyoyoyoy');
+  console.log(medalRange);
+  var filterMedalsAndAmount = filterByMedal(medalsFiltered, olympicAmountCounts, olympicAmountRange[0], olympicAmountRange[1]);
+  return filterMedalsAndAmount;
 }
 
 
@@ -473,6 +531,7 @@ d3.csv(csvFile).then(function(data) {
   initializeTimeSlider();
   // initialize medalSlider
   initializeMedalSlider();
+  initializeOlympicAmountSlider();
   // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
   autocomplete(document.getElementById("searchbar"));
