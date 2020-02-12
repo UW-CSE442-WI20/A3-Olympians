@@ -72,7 +72,7 @@ export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, col
         //Get this circle's x/y values, then augment for the tooltip
         var xPosition = parseFloat(d3.select(this).attr("cx"));
         var yPosition = parseFloat(d3.select(this).attr("cy"));
-        console.log("x: " + xPosition + " y: " + yPosition);
+
         //Create the tooltip label
         svg.append("text")
           .attr("id", "tooltip")
@@ -105,18 +105,9 @@ export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, col
       })
       .on("click", function(d) {
         // get the data for the selected athlete
-        console.log(Object.values(d3.values(entriesByName)));
         var athleteData = _.find(d3.values(entriesByName), function(item) {
-          // console.log("key: " + item.key);
-          // console.log("searching for: " + d.Name);
           return item.key === d.Name;
         });
-        console.log("result: " + athleteData.values);
-
-        athleteData.values.forEach(function(element) {
-          console.log(element);
-        });
-
       });
   }
 }
@@ -229,7 +220,7 @@ export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale
         //Get this circle's x/y values, then augment for the tooltip
         var xPosition = parseFloat(d3.select(this).attr("cx"));
         var yPosition = parseFloat(d3.select(this).attr("cy"));
-        console.log("x: " + xPosition + " y: " + yPosition);
+        
         //Create the tooltip label
         svg.append("text")
           .attr("id", "tooltip")
@@ -262,18 +253,9 @@ export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale
       })
       .on("click", function(d) {
         // get the data for the selected athlete
-        console.log(Object.values(d3.values(entriesByName)));
         var athleteData = _.find(d3.values(entriesByName), function(item) {
-          // console.log("key: " + item.key);
-          // console.log("searching for: " + d.Name);
           return item.key === d.Name;
         });
-        console.log("result: " + athleteData.values);
-
-        athleteData.values.forEach(function(element) {
-          console.log(element);
-        });
-
       });
   }
 }

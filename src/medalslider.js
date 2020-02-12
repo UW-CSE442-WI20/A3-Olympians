@@ -55,7 +55,6 @@ export function medalslider(min, max) {
             var s = d3.event.selection;
             var svg = d3.select('svg');
             svg.node().value = s.map(d => Math.round(x.invert(d)));
-            console.log(svg.node().value);
             //svg.node().value = determineYear(val, slidervalues);
             // update and move labels
             labelL.attr('x', s[0])
@@ -68,13 +67,14 @@ export function medalslider(min, max) {
                 .attr("transform", function (d, i) {
                     return "translate(" + [s[i], -height / 4] + ")";
                 });  // CHANGE HANDLE POSITION HERE
-            // update view
-            // if the view should only be updated after brushing is over,
-            // move these two lines into the on('end') part below
             svg.node().dispatchEvent(new CustomEvent("input"));
+        })
+        .on('end', () => {
+            // update view
+            // view should only be updated after brushing is over
             let event = new Event("change");
             medalsEventHandler.dispatchEvent(event);
-        })
+        });
 
     // append brush to g
     var gBrush = g.append("g")
@@ -124,8 +124,6 @@ export function medalslider(min, max) {
 
     var getRange = function () {
         var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
-        //range = determineYear(range, slidervalues);
-        console.log("RANGE ", range);
         return range
     }
 
