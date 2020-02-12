@@ -136,14 +136,17 @@ export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale
     var line = chart.append("g").selectAll("line").data(inputData.values)
       .enter()
       .append("line")
+      .attr("id", function(d) {
+        return "l" + d.NOC
+      })
+      .attr("id", function(d) {
+        return "l" + d.ID;
+      })
       .style("opacity", 0)
       .style("stroke", function(d) {
         return colorScale(d[colorColumn]);
       })
       .style("stroke-width", 1)
-      .attr("id", function(d) {
-        return "l" + d.NOC;
-      })
       .attr("x1", function(d) {
         return xScale(d[xColumn]);
       })
@@ -169,6 +172,9 @@ export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale
       .style("opacity", 0)
       .attr("id", function(d) {
         return "c" + d.NOC;
+      })
+      .attr("id", function(d) {
+        return "c" + d.ID;
       })
       .attr("cx", function(d) {
         // return xScale(d[xColumn]);

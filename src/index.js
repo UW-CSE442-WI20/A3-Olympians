@@ -157,11 +157,14 @@ function setupNOCFiltering(data) {
     selectedValues = [].map.call(selectedOptions, option => option.value);
     //var medals = document.getElementById('numMedals').value;
 
+    // want all to fade and only the ones that remain to stay
     chart.selectAll("line")
       .transition()
       .style("opacity", 0)
       .remove();
 
+    // want all of them to animate and then the ones that remain to
+    // reanimate back
     chart.selectAll("circle")
       .transition()
       .delay(200)
@@ -206,7 +209,7 @@ function setupNOCFiltering(data) {
         minOrder = athleteMinOrder.Order;
       }
     }
-    peopleNames = [];
+
     for (var i = 0; i < selectedValues.length; i++) {
       redrawWithAnimation(svg, chart, filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]),
          entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
