@@ -27,6 +27,8 @@ export var maxOrder = 8760;
 
 export var medalCounts;
 export var medalRange = [1, 28]; // [minMedals, maxMedals]
+export var olympicAmountCounts;
+export var olympicAmountRange = [1, 7];
 export var selectedValues = [];
 export var peopleNames = [];
 // data structures to be loaded in
