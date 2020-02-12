@@ -48,8 +48,6 @@ export function generateAthleteChart(data) {
                 { key: item.Year, values: medalMap
                 }))}});
 
-    console.log("group data: ", groupData);
-
     var smallsvg = d3.select("#small-chart");
 
     // ideally want to have the medals shrink to 0, update axes and redraw everything
@@ -172,11 +170,11 @@ export function generateAthleteChart(data) {
     }
 
     slice.selectAll("circle")
-        .data(function(d) { console.log("d values: ", d.values); return d.values; })
+        .data(function(d) { return d.values; })
         .enter().append("circle")
-        .style("fill", function(d) { console.log("d grpName: ", d.grpName); return color(d.grpName) })
-        .attr("cx", function(d) { console.log("x bandwidth:", xSmallScale.bandwidth()); console.log("cx: ", cxOffset(d.grpName) * xSmallScale.bandwidth()); return cxOffset(d.grpName) * xSmallScale.bandwidth(); })
-        .attr("cy", function(d) { console.log("d grpValue: ", d.grpValue); return ySmallScale(d.grpValue - 1.5) })
+        .style("fill", function(d) { return color(d.grpName) })
+        .attr("cx", function(d) { return cxOffset(d.grpName) * xSmallScale.bandwidth(); })
+        .attr("cy", function(d) { return ySmallScale(d.grpValue - 1.5) })
         .attr("r", 10);
 
     // now add titles to the axes
@@ -189,8 +187,4 @@ export function generateAthleteChart(data) {
         .attr("text-anchor", "middle") // this makes it easy to centre the text as the transform is applied to the anchor
         .attr("transform", "translate(" + (smallWidth / 2) + "," + (smallHeight - smallMargin.bottom / 10) + ")") // centre below axis
         .text("Year Competed");
-
-    data.forEach(function(d) {
-        console.log(d.Name + " -- " + d.Year + ", " + d.Medal + ", " + d.Event);
-    });
 }

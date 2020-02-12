@@ -93,7 +93,6 @@ const csvFile = require('../data/olympic_overall.csv');
 
 // function to set up the nested data structures
 function initializeDataStructures(data) {
-  console.log(data);
   // convert each value to its appropriate data type
   data.forEach(function(d) {
     d.ID = +d.ID;
@@ -144,13 +143,6 @@ function initializeDataStructures(data) {
   olympicAmountCounts = _.countBy(uniqueYears, function(item) {
     return item.Name;
   })
-  console.log('1a');
-  console.log(olympicAmountCounts);
-
-  // find the maximum number of medals someone has
-  // maxMedals = _.max(medalCounts, function (item) {
-  //   return item;
-  // });
 }
 
 
@@ -316,8 +308,6 @@ function initializeOlympicAmountSlider() {
       // redraw data within range selection
       if (typeof selectedValues !== 'undefined') {
         for (let i = 0; i < selectedValues.length; i++) {
-          // var amountFilter = filterByMedal(entriesByNOC[selectedValues[i]], olympicAmountCounts, olympicAmountRange[0], olympicAmountRange[1]);
-          // console.log(amountFilter);
           redraw(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
              entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
         }
@@ -327,8 +317,6 @@ function initializeOlympicAmountSlider() {
 
 function filterAll (data) {
   var medalsFiltered = filterByMedal(data, medalCounts, medalRange[0], medalRange[1]);
-  console.log('yoyoyoyoyoyoy');
-  console.log(medalRange);
   var filterMedalsAndAmount = filterByMedal(medalsFiltered, olympicAmountCounts, olympicAmountRange[0], olympicAmountRange[1]);
   return filterMedalsAndAmount;
 }
@@ -458,7 +446,6 @@ function initializeTimeSlider() {
   updateTimeSlider([1896, 2016]);
   // when the input range changes, update the start and end years
   d3.select('#eventHandler').on('change', function() {
-    //console.log("changed");
     updateTimeSlider(mySlider.getRange());
   });
 }
@@ -502,16 +489,6 @@ function updateTimeSlider(range) {
 
 // function to place all setup done for filtering options
 function initializeOptions(data) {
-
-  console.log(entriesByName);
-  console.log(entriesByStartThenName);
-  console.log(entriesByNOC);
-
-  // Bin: For now, setupMedalFiltering has to be called before setupNOCFiltering
-  // due to dependencies.
-  // TODO: Bin fix this
-  //setupMedalFiltering(data);
-
   setupNOCFiltering(data);
 }
 
