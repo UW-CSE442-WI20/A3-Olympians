@@ -6,7 +6,7 @@ import {
 } from './athletechart';
 
 // function to draw lines and points given inputData
-// no animation included
+// with opacity animation included
 export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
   if (typeof inputData !== 'undefined') {
 
@@ -14,9 +14,10 @@ export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, col
     xScale.domain([minOrder, maxOrder]);
     xAxisGroup.transition().call(xAxis);
 
-    chart.append("g").selectAll("line").data(inputData.values)
+    var line = chart.append("g").selectAll("line").data(inputData.values)
       .enter()
       .append("line")
+      .style("opacity", 0)
       .style("stroke", function(d) {
         return colorScale(d[colorColumn]);
       })
@@ -32,10 +33,17 @@ export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, col
       })
       .attr("y2", function(d) {
         return yScale(d["End"]);
-      });
-    chart.append("g").selectAll('circle').data(inputData.values)
+      })
+
+    line.transition()
+      .delay(200)
+      .style("opacity", 1.0)
+      .duration(500);
+
+    var circle = chart.append("g").selectAll('circle').data(inputData.values)
       .enter()
       .append('circle')
+      .style("opacity", 0)
       .attr("cx", function(d) {
         return xScale(d[xColumn]);
       })
@@ -49,7 +57,13 @@ export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, col
       .attr("label", function(d) {
         return d.Name
       })
-      .on("mouseover", function(d) {
+
+    circle.transition()
+      .delay(200)
+      .style("opacity", 1.0)
+      .duration(500);
+
+    circle.on("mouseover", function(d) {
         // circle gets bigger
         d3.select(this)
           .transition()

@@ -30,7 +30,7 @@ var {
   endYear,
 
   minOrder,
-  maxOrder, 
+  maxOrder,
   // csvFile,
 
   medalCounts,
@@ -49,8 +49,8 @@ var {
   NOCs,
 
   xScale,
-  yScale, 
-  colorScale, 
+  yScale,
+  colorScale,
   // get the svg
   svg,
 
@@ -253,8 +253,16 @@ function initializeMedalSlider() {
   d3.select('#medalsEventHandler')
     .on('change', function() {
       // reset
-      chart.selectAll("circle").remove();
-      chart.selectAll("line").remove();
+      chart.selectAll("circle")
+        .transition()
+        .style("opacity", 0)
+        .duration(500)
+        .remove();
+      chart.selectAll("line")
+        .transition()
+        .style("opacity", 0)
+        .duration(500)
+        .remove();
       // get min and max medal medal counts
       medalRange = myMedalSlider.getRange();
       // redraw data within range selection

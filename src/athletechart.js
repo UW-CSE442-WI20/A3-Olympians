@@ -12,7 +12,6 @@ const _ = require("underscore");
 export function generateAthleteChart(data) {
 
     const containsYear = (groups, year) => {
-        console.log("ehlo")
         return _.find(d3.values(groups), function(item) {
             return item.key === year;
         });
@@ -27,26 +26,11 @@ export function generateAthleteChart(data) {
     }
 
     const groupData = [];
-    // data.forEach(function(item) { if (containsYear(groupData, item.Year) === undefined) oldgroupData.push(new Object(
-    //     { key: item.Year, values:
-    //             [
-    //                 {grpName:'Bronze', grpValue:getMedalCount('Bronze', item.Year)},
-    //                 {grpName:'Silver', grpValue:getMedalCount('Silver', item.Year)},
-    //                 {grpName:'Gold', grpValue:getMedalCount('Gold', item.Year)}
-    //             ]
-    //     }))});
-
-    // var medalsRepresented = []; // one entry for each year
 
     data.forEach(function(item) {
         var bronze = getMedalCount('Bronze', item.Year);
         var silver = getMedalCount('Silver', item.Year);
         var gold = getMedalCount('Gold', item.Year);
-        var yearMedals = [];
-        // bronze > 0 ? yearMedals.push({mdlName:'Bronze',represented:true}) : yearMedals.push({mdlName:'Bronze',represented:false});
-        // silver > 0 ? yearMedals.push({mdlName:'Silver',represented:true}) : yearMedals.push({mdlName:'Silver',represented:true});
-        // gold > 0 ? yearMedals.push({mdlName:'Gold',represented:true}) : yearMedals.push({mdlName:'Gold',represented:true});
-        // medalsRepresented.push({year:item.Year, values:yearMedals})
 
         if (containsYear(groupData, item.Year) === undefined) {
             var medalMap = [];
@@ -81,7 +65,7 @@ export function generateAthleteChart(data) {
         left: 60,
         top: 30,
         right: 30,
-        bottom: 30
+        bottom: 60
     };
 
     var innerSmallWidth = smallWidth - smallMargin.left - smallMargin.right;
@@ -99,8 +83,18 @@ export function generateAthleteChart(data) {
         });
     })]);
 
-    const xSmallScale = d3.scaleTime().domain([(+data[0].Start - 4), (+data[0].End + 4)]).range([smallMargin["left"], innerSmallWidth]);
-    const ySmallScale = d3.scaleLinear().domain([10, 0]).range([smallMargin["bottom"], innerSmallHeight]);
+    const getXDomain = () =>
+    {
+        var domain = [];
+        for (let i = +data[0].Start - 4; i <= +data[0].End + 4; i += 4) {
+            domain.push(i);
+        }
+        return domain;
+    }
+
+    // const xSmallScale = d3.scaleTime().domain([(+data[0].Start - 4), (+data[0].End + 4)]).range([smallMargin.left, innerSmallWidth]);
+    const xSmallScale = d3.scaleBand().domain(getXDomain()).range([smallMargin.left, innerSmallWidth]);
+    const ySmallScale = d3.scaleLinear().domain([10, 0]).range([smallMargin.bottom, innerSmallHeight]);
 
     const getTickValues = (startTick, endTick) => {
         var values = [];
@@ -129,10 +123,10 @@ export function generateAthleteChart(data) {
         .attr("class", "axis x")
         .attr("transform", "translate(0," + innerSmallHeight + ")")
         .call(xSmallAxis);
-    const ySmallAxisGroup = smallsvg.append("g")
-        .attr("class", "axis y")
-        .attr("transform", "translate(" + smallMargin["left"] + ",0)")
-        .call(ySmallAxis);
+    // const ySmallAxisGroup = smallsvg.append("g")
+    //     .attr("class", "axis y")
+    //     .attr("transform", "translate(" + smallMargin["left"] + ",0)")
+    //     .call(ySmallAxis);
 
     var x1 = d3.scaleBand();
     var medalTypes = groupData[0].values.map(function(d) {
@@ -169,66 +163,31 @@ export function generateAthleteChart(data) {
 
     var cxOffset = medalType => {
         if (medalType === 'Bronze') {
-            return -2;
+            return 0.3;
         } else if (medalType === 'Silver') {
-            return 0;
+            return 0.5;
         } else {
-            return 2;
+            return 0.7;
         }
     }
-    // var cxOffset = (medalType, year) => {
-    //     console.log("medals represented:", medalsRepresented)
-    //     if (medalsRepresented[0].represented && medalsRepresented[1].represented && medalsRepresented[2].represented) {
-    //       if (medalType === 'Bronze') {
-    //         return -2;
-    //       } else if (medalType === 'Silver') {
-    //         return 0;
-    //       } else {
-    //         return 2;
-    //       }
-    //     }
-    //     if (!medalsRepresented.year. [year].values[0].represented) {
-    //       if (medalsRepresented[1].represented && medalsRepresented[2].represented) {
-    //         if (medalType === 'Silver') {
-    //           return -1;
-    //         } else if (medalType === 'Gold') {
-    //           return 1;
-    //         }
-    //       } else {
-    //         // either only silver or only gold
-    //         console.log("only silver or only gold")
-    //         return 0;
-    //       }
-    //     }
-    //     if (!medalsRepresented[1].represented && medalsRepresented[2].represented) {
-    //       if (medalType === 'Bronze') {
-    //         return -1;
-    //       } else if (medalType === 'Gold') {
-    //         return 1;
-    //       }
-    //     }
-    //     // only bronze
-    //     console.log("only bronze")
-    //     return 0;
-    // }
 
     slice.selectAll("circle")
         .data(function(d) { console.log("d values: ", d.values); return d.values; })
         .enter().append("circle")
         .style("fill", function(d) { console.log("d grpName: ", d.grpName); return color(d.grpName) })
-        .attr("cx", function(d) { console.log("cx: ", cxOffset(d.grpName) * x1.bandwidth()); return cxOffset(d.grpName) * x1.bandwidth(); })
+        .attr("cx", function(d) { console.log("x bandwidth:", xSmallScale.bandwidth()); console.log("cx: ", cxOffset(d.grpName) * xSmallScale.bandwidth()); return cxOffset(d.grpName) * xSmallScale.bandwidth(); })
         .attr("cy", function(d) { console.log("d grpValue: ", d.grpValue); return ySmallScale(d.grpValue - 1.5) })
-        .attr("r", 20);
+        .attr("r", 10);
 
     // now add titles to the axes
     smallsvg.append("text")
         .attr("text-anchor", "middle") // this makes it easy to centre the text as the transform is applied to the anchor
-        .attr("transform", "translate(" + (smallMargin["left"] / 2) + "," + (smallHeight / 2) + ")rotate(-90)") // text is drawn off the screen top left, move down and out and rotate
-        .text("Number of Medals Won");
+        .attr("transform", "translate(" + smallMargin.left + "," + (smallHeight / 2) + ")rotate(-90)") // text is drawn off the screen top left, move down and out and rotate
+        .text("Medals Won");
 
     smallsvg.append("text")
         .attr("text-anchor", "middle") // this makes it easy to centre the text as the transform is applied to the anchor
-        .attr("transform", "translate(" + (smallWidth / 2) + "," + (smallHeight) + ")") // centre below axis
+        .attr("transform", "translate(" + (smallWidth / 2) + "," + (smallHeight - smallMargin.bottom / 10) + ")") // centre below axis
         .text("Year Competed");
 
     data.forEach(function(d) {
