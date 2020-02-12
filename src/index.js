@@ -171,16 +171,11 @@ function setupNOCFiltering(data) {
       .style("opacity", 0)
       .remove();
 
-    // want all of them to animate and then the ones that remain to
-    // reanimate back
     chart.selectAll("circle")
       .transition()
       .delay(200)
       .duration(1000)
       .ease(d3.easeQuadIn)
-      .attr("id", function(d) {
-        return "c" + d.NOC;
-      })
       .attr("cx", function(d) {
         // return xScale(d[xColumn]);
         return xScale((maxOrder + minOrder) / 2);
@@ -238,6 +233,7 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
   }
   let currMedals = [];
   for (var person in medalCounts) {
+    // console.log("person", person)
     if (medalCounts[person] >= minMedals && medalCounts[person] <= maxMedals) {
       currMedals.push(person);
     }
@@ -246,6 +242,18 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
     const hasEnoughMedals = _.indexOf(currMedals, item.Name) >= 0;
     if (hasEnoughMedals) {
       peopleNames.push(item.Name);
+    } else {
+      console.log("in here");
+        d3.selectAll(".c" + item.Name.substr(0, item.Name.indexOf(" ")))
+          .transition()
+          .style("opacity", 0)
+          .duration(2000)
+          .remove();
+          d3.selectAll(".l" + item.Name.substr(0, item.Name.indexOf(" ")))
+          .transition()
+          .style("opacity", 0)
+          .duration(2000)
+          .remove();
     }
     return hasEnoughMedals;
   });
@@ -264,19 +272,9 @@ function initializeMedalSlider() {
   medalRange = myMedalSlider.getRange();
   // minMedals = medalRange[0];
   // maxMedals = medalRange[1];
+  console.log("medalRange", medalRange);
   d3.select('#medalsEventHandler')
     .on('change', function() {
-      // reset
-      chart.selectAll("circle")
-        .transition()
-        .style("opacity", 0)
-        .duration(500)
-        .remove();
-      chart.selectAll("line")
-        .transition()
-        .style("opacity", 0)
-        .duration(500)
-        .remove();
       // get min and max medal medal counts
       medalRange = myMedalSlider.getRange();
       // redraw data within range selection
@@ -298,17 +296,6 @@ function initializeOlympicAmountSlider() {
   // maxMedals = medalRange[1];
   d3.select('#olympicAmountEventHandler')
     .on('change', function() {
-      // reset
-      chart.selectAll("circle")
-        .transition()
-        .style("opacity", 0)
-        .duration(500)
-        .remove();
-      chart.selectAll("line")
-        .transition()
-        .style("opacity", 0)
-        .duration(500)
-        .remove();
       // get min and max medal medal counts
       olympicAmountRange = myOlympicAmountSlider.getRange();
       // redraw data within range selection

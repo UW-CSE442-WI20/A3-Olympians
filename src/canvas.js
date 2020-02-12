@@ -22,6 +22,12 @@ export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, col
         return colorScale(d[colorColumn]);
       })
       .style("stroke-width", 1)
+      .attr("id", function(d) {
+        return "l" + d.NOC;
+      })
+      .attr("class", function(d) {
+        return "l" + d.Name;
+      })
       .attr("x1", function(d) {
         return xScale(d[xColumn]);
       })
@@ -44,6 +50,12 @@ export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, col
       .enter()
       .append('circle')
       .style("opacity", 0)
+      .attr("id", function(d) {
+        return "c" + d.NOC;
+      })
+      .attr("class", function(d) {
+        return "c" + d.Name.substr(0, d.Name.indexOf(" "));
+      })
       .attr("cx", function(d) {
         return xScale(d[xColumn]);
       })
@@ -130,8 +142,8 @@ export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale
       .attr("id", function(d) {
         return "l" + d.NOC
       })
-      .attr("id", function(d) {
-        return "l" + d.ID;
+      .attr("class", function(d) {
+        return "l" + d.Name.substr(0, d.Name.indexOf(" "));;
       })
       .style("opacity", 0)
       .style("stroke", function(d) {
@@ -164,8 +176,8 @@ export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale
       .attr("id", function(d) {
         return "c" + d.NOC;
       })
-      .attr("id", function(d) {
-        return "c" + d.ID;
+      .attr("class", function(d) {
+        return "c" + d.Name;
       })
       .attr("cx", function(d) {
         // return xScale(d[xColumn]);
@@ -220,7 +232,7 @@ export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale
         //Get this circle's x/y values, then augment for the tooltip
         var xPosition = parseFloat(d3.select(this).attr("cx"));
         var yPosition = parseFloat(d3.select(this).attr("cy"));
-        
+
         //Create the tooltip label
         svg.append("text")
           .attr("id", "tooltip")
