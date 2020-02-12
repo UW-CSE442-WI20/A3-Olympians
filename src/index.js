@@ -12,6 +12,9 @@ import {
 import {
   medalslider
 } from './medalslider';
+import {
+  generateAthleteChart
+} from './athletechart';
 
 var {
   outerWidth,
