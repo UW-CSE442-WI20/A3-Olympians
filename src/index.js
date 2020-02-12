@@ -224,7 +224,7 @@ function setupNOCFiltering(data) {
     }
     peopleNames = [];
     for (var i = 0; i < selectedValues.length; i++) {
-      var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
+      //var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
       redrawWithAnimation(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
          entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
     }
@@ -284,7 +284,7 @@ function initializeMedalSlider() {
       // redraw data within range selection
       if (typeof selectedValues !== 'undefined') {
         for (let i = 0; i < selectedValues.length; i++) {
-          var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
+          // var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
           redraw(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
              entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
         }
