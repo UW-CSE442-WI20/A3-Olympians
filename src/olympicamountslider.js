@@ -67,13 +67,14 @@ export function olympicamountslider(min, max) {
                 .attr("transform", function (d, i) {
                     return "translate(" + [s[i], -height / 4] + ")";
                 });  // CHANGE HANDLE POSITION HERE
-            // update view
-            // if the view should only be updated after brushing is over,
-            // move these two lines into the on('end') part below
             svg.node().dispatchEvent(new CustomEvent("input"));
+        })
+        .on('end', () => {
+            // update view
+            // view should only be updated after brushing is over
             let event = new Event("change");
             olympicAmountEventHandler.dispatchEvent(event);
-        })
+        });
 
     // append brush to g
     var gBrush = g.append("g")
