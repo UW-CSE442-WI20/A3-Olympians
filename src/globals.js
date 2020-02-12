@@ -15,7 +15,7 @@ export var margin = {
 };
 export var innerWidth = outerWidth - margin.left - margin.right;
 export var innerHeight = outerHeight - margin.top - margin.bottom;
-export var circleRadius = 3;
+export var circleRadius = 5;
 export var xColumn = "Order";
 export var yColumn = "Year";
 export var colorColumn = "NOC"; // color of circles based on athlete NOC
@@ -27,6 +27,8 @@ export var maxOrder = 8760;
 
 export var medalCounts;
 export var medalRange = [1, 28]; // [minMedals, maxMedals]
+export var olympicAmountCounts;
+export var olympicAmountRange = [1, 7];
 export var selectedValues = [];
 export var peopleNames = [];
 // data structures to be loaded in

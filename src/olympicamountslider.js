@@ -6,7 +6,7 @@
 
 const d3 = require("d3");
 
-export function medalslider(min, max) {
+export function olympicamountslider(min, max) {
     var myrange = [min, max + 1];
     //var slidervalues = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,
     //  15,16,17,18,19,20,21,22,23,24,25,26,27,28];
@@ -23,11 +23,11 @@ export function medalslider(min, max) {
         .range([0, width]);  // display space
 
     // create translated g
-    const g = d3.select("#medalSlider")
+    const g = d3.select("#olympicAmountSlider")
         .append('g')
         .attr('transform', "translate(90,0)");
 
-    //draw background lines
+    // draw background lines
     g.append('g').selectAll('line')
         .data(d3.range(myrange[0], myrange[1] + 1))
         .enter()
@@ -73,7 +73,7 @@ export function medalslider(min, max) {
             // update view
             // view should only be updated after brushing is over
             let event = new Event("change");
-            medalsEventHandler.dispatchEvent(event);
+            olympicAmountEventHandler.dispatchEvent(event);
         });
 
     // append brush to g
@@ -124,7 +124,7 @@ export function medalslider(min, max) {
 
     var getRange = function () {
         var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
-        return range
+        return range;
     }
 
     return {getRange: getRange}

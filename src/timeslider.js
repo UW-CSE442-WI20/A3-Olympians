@@ -72,7 +72,7 @@ export function timeslider(min, max) {
         // move these two lines into the on('end') part below
         svg.node().dispatchEvent(new CustomEvent("input"));
         let event = new Event("change");
-        eventHandler.dispatchEvent(event);
+        timeEventHandler.dispatchEvent(event);
       })
 
     // append brush to g
@@ -122,7 +122,6 @@ export function timeslider(min, max) {
     var getRange = function() {
       var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
       range = determineYear(range, slidervalues);
-      //console.log("RANGE ", range);
       return range }
 
      return {getRange: getRange}

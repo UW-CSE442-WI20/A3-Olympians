@@ -13,6 +13,9 @@ import {
   medalslider
 } from './medalslider';
 import {
+  olympicamountslider
+} from './olympicamountslider';
+import {
   generateAthleteChart
 } from './athletechart';
 
@@ -35,6 +38,8 @@ var {
 
   medalCounts,
   medalRange,
+  olympicAmountCounts,
+  olympicAmountRange,
   selectedValues,
   peopleNames,
   // data structures to be loaded in
@@ -88,7 +93,6 @@ const csvFile = require('../data/olympic_overall.csv');
 
 // function to set up the nested data structures
 function initializeDataStructures(data) {
-  console.log(data);
   // convert each value to its appropriate data type
   data.forEach(function(d) {
     d.ID = +d.ID;
@@ -131,10 +135,14 @@ function initializeDataStructures(data) {
     return item.Name;
   });
 
-  // find the maximum number of medals someone has
-  // maxMedals = _.max(medalCounts, function (item) {
-  //   return item;
-  // });
+
+  const uniqueYears = _.uniq(data, function(item) {
+    return item.Name + " " + item.Year;
+  })
+
+  olympicAmountCounts = _.countBy(uniqueYears, function(item) {
+    return item.Name;
+  })
 }
 
 
@@ -157,6 +165,7 @@ function setupNOCFiltering(data) {
     selectedValues = [].map.call(selectedOptions, option => option.value);
     //var medals = document.getElementById('numMedals').value;
 
+    // want all to fade and only the ones that remain to stay
     chart.selectAll("line")
       .transition()
       .style("opacity", 0)
@@ -167,9 +176,6 @@ function setupNOCFiltering(data) {
       .delay(200)
       .duration(1000)
       .ease(d3.easeQuadIn)
-      .attr("id", function(d) {
-        return "c" + d.NOC;
-      })
       .attr("cx", function(d) {
         // return xScale(d[xColumn]);
         return xScale((maxOrder + minOrder) / 2);
@@ -206,12 +212,12 @@ function setupNOCFiltering(data) {
         minOrder = athleteMinOrder.Order;
       }
     }
-    peopleNames = [];
+
     for (var i = 0; i < selectedValues.length; i++) {
-      redrawWithAnimation(svg, chart, filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]),
+      //var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
+      redrawWithAnimation(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
          entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
     }
-
   });
 }
 
@@ -222,8 +228,12 @@ function setupNOCFiltering(data) {
 // minMedals - current min number of medals
 // maxMedals - current max number of medals
 function filterByMedal(data, medalCounts, minMedals, maxMedals) {
+  if (typeof data === 'undefined') {
+    return undefined;
+  }
   let currMedals = [];
   for (var person in medalCounts) {
+    // console.log("person", person)
     if (medalCounts[person] >= minMedals && medalCounts[person] <= maxMedals) {
       currMedals.push(person);
     }
@@ -232,10 +242,22 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
     const hasEnoughMedals = _.indexOf(currMedals, item.Name) >= 0;
     if (hasEnoughMedals) {
       peopleNames.push(item.Name);
+    } else {
+      console.log("in here");
+        d3.selectAll(".c" + item.Name.substr(0, item.Name.indexOf(" ")))
+          .transition()
+          .style("opacity", 0)
+          .duration(2000)
+          .remove();
+          d3.selectAll(".l" + item.Name.substr(0, item.Name.indexOf(" ")))
+          .transition()
+          .style("opacity", 0)
+          .duration(2000)
+          .remove();
     }
     return hasEnoughMedals;
   });
-  peopleNames = _.uniq(peopleNames, true);
+  peopleNames = _.uniq(peopleNames, false);
   currPeople = d3.nest()
     .key(function() {
       return data.key;
@@ -248,31 +270,44 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
 function initializeMedalSlider() {
   var myMedalSlider = medalslider(1, 28);
   medalRange = myMedalSlider.getRange();
-  // minMedals = medalRange[0];
-  // maxMedals = medalRange[1];
   d3.select('#medalsEventHandler')
     .on('change', function() {
-      // reset
-      chart.selectAll("circle")
-        .transition()
-        .style("opacity", 0)
-        .duration(500)
-        .remove();
-      chart.selectAll("line")
-        .transition()
-        .style("opacity", 0)
-        .duration(500)
-        .remove();
       // get min and max medal medal counts
       medalRange = myMedalSlider.getRange();
       // redraw data within range selection
+      peopleNames = [];
       if (typeof selectedValues !== 'undefined') {
         for (let i = 0; i < selectedValues.length; i++) {
-          redraw(svg, chart, filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]),
+          redraw(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
              entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
         }
       }
     });
+}
+
+// initialize the olympicslider
+function initializeOlympicAmountSlider() {
+  var myOlympicAmountSlider = olympicamountslider(1, 8);
+  olympicAmountRange = myOlympicAmountSlider.getRange();
+  d3.select('#olympicAmountEventHandler')
+    .on('change', function() {
+      // get min and max participation counts
+      olympicAmountRange = myOlympicAmountSlider.getRange();
+      // redraw data within range selection
+      peopleNames = [];
+      if (typeof selectedValues !== 'undefined') {
+        for (let i = 0; i < selectedValues.length; i++) {
+          redraw(svg, chart, filterAll(entriesByNOC[selectedValues[i]]),
+             entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
+        }
+      }
+    });
+}
+
+function filterAll (data) {
+  var medalsFiltered = filterByMedal(data, medalCounts, medalRange[0], medalRange[1]);
+  var filterMedalsAndAmount = filterByMedal(medalsFiltered, olympicAmountCounts, olympicAmountRange[0], olympicAmountRange[1]);
+  return filterMedalsAndAmount;
 }
 
 
@@ -399,8 +434,7 @@ function initializeTimeSlider() {
   // Initial start and end years
   updateTimeSlider([1896, 2016]);
   // when the input range changes, update the start and end years
-  d3.select('#eventHandler').on('change', function() {
-    //console.log("changed");
+  d3.select('#timeEventHandler').on('change', function() {
     updateTimeSlider(mySlider.getRange());
   });
 }
@@ -444,16 +478,6 @@ function updateTimeSlider(range) {
 
 // function to place all setup done for filtering options
 function initializeOptions(data) {
-
-  console.log(entriesByName);
-  console.log(entriesByStartThenName);
-  console.log(entriesByNOC);
-
-  // Bin: For now, setupMedalFiltering has to be called before setupNOCFiltering
-  // due to dependencies.
-  // TODO: Bin fix this
-  //setupMedalFiltering(data);
-
   setupNOCFiltering(data);
 }
 
@@ -473,6 +497,8 @@ d3.csv(csvFile).then(function(data) {
   initializeTimeSlider();
   // initialize medalSlider
   initializeMedalSlider();
+ // initialize olympicSlider
+  initializeOlympicAmountSlider();
   // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
   autocomplete(document.getElementById("searchbar"));
