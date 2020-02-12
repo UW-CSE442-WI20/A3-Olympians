@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////
 const d3 = require("d3");
 
-export var outerWidth = 1200;
+export var outerWidth = 1000;
 export var outerHeight = 800;
 export var margin = {
   left: 60,

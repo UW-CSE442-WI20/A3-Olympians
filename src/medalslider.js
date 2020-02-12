@@ -25,9 +25,9 @@ export function medalslider(min, max) {
     // create translated g
     const g = d3.select("#medalSlider")
         .append('g')
-        .attr('transform', "translate(60,0)");
+        .attr('transform', "translate(90,0)");
 
-    // draw background lines
+    //draw background lines
     g.append('g').selectAll('line')
         .data(d3.range(myrange[0], myrange[1] + 1))
         .enter()
@@ -96,9 +96,9 @@ export function medalslider(min, max) {
         .enter().append("path")
         .attr("class", "handle--custom")
         .attr("transform", "translate(10,10)")
-        .attr("stroke", "blue")
+        .attr("stroke", "#00cdcf")
         .attr("stroke-width", 1.5)
-        .attr("fill", "blue")
+        .attr("fill", "#00cdcf")
         .attr("cursor", "ew-resize")
         .attr("d", brushResizePath);  // the brush shape
 

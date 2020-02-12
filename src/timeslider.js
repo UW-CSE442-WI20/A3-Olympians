@@ -26,11 +26,11 @@ export function timeslider(min, max) {
   // create translated g
   const g = d3.select("#timeSlider")
     .append('g')
-    .attr('transform', "translate(60,0)");
+    .attr('transform', "translate(90,0)");
 
   // draw background lines
   g.append('g').selectAll('line')
-    .data(d3.range(myrange[0], myrange[1]+1))
+    .data(slidervalues) //d3.range(myrange[0], myrange[1]+1))
     .enter()
     .append('line')
     .attr('x1', d => x(d)).attr('x2', d => x(d))
@@ -95,9 +95,9 @@ export function timeslider(min, max) {
       .enter().append("path")
       .attr("class", "handle--custom")
       .attr("transform", "translate(10,10)")
-      .attr("stroke", "blue")
+      .attr("stroke", "#00cdcf")
       .attr("stroke-width", 1.5)
-      .attr("fill", "blue")
+      .attr("fill", "#00cdcf")
       .attr("cursor", "ew-resize")
       .attr("d", brushResizePath);  // the brush shape
 
