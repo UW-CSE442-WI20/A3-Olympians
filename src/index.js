@@ -268,7 +268,6 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
 // initialize the medalslider
 function initializeMedalSlider() {
   var myMedalSlider = medalslider(1, 28);
-  medalRange = myMedalSlider.getRange();
   d3.select('#medalsEventHandler')
     .on('change', function() {
       // get min and max medal medal counts
