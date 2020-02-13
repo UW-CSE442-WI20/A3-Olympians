@@ -286,7 +286,6 @@ function initializeMedalSlider() {
 // initialize the olympicslider
 function initializeOlympicAmountSlider() {
   var myOlympicAmountSlider = olympicamountslider(1, 5);
-  olympicAmountRange = myOlympicAmountSlider.getRange();
   d3.select('#olympicAmountEventHandler')
     .on('change', function() {
       // get min and max participation counts
