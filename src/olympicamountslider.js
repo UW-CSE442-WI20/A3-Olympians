@@ -28,6 +28,8 @@ function olympicamountslider(min, max) {
         .append('g')
         .attr('transform', "translate(90,0)");
 
+    console.log("career g", g);
+
     // draw background lines
     g.append('g').selectAll('line')
         .data(d3.range(myrange[0], myrange[1] + 1))
