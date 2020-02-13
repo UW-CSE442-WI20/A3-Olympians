@@ -507,7 +507,7 @@ function timeslider(min, max) {
      .range([0, width]);  // display space
 
   // create translated g
-  const g = d3.select("#timeSlider")
+  const g = d3.select("#timeSlider svg")
     .append('g')
     .attr('transform', "translate(90,0)");
 
@@ -866,7 +866,7 @@ function olympicamountslider(min, max) {
         .range([0, width]);  // display space
 
     // create translated g
-    const g = d3.select("#olympicAmountSlider")
+    const g = d3.select("#olympicAmountSlider svg")
         .append('g')
         .attr('transform', "translate(90,0)");
 
