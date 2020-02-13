@@ -9,8 +9,8 @@ const generateAthleteChart = require("./athletechart");
 
 // function to draw lines and points given inputData
 // with opacity animation included
-module.exports = 
-function redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
+module.exports = {
+redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
   if (typeof inputData !== 'undefined') {
 
     // update the X-axis
@@ -133,15 +133,14 @@ function redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale
         });
       });
   }
-}
+},
 
 // function to draw lines and points given inputData
 // will animate points by pulling them all to the center
 // and pushing them back out to their new, evenly spaced
 // positions
 // Note: currently does not support .exit() functionality
-module.exports = 
-function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
+redrawWithAnimation(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
   if (typeof inputData !== 'undefined') {
 
     // update the X-axis
@@ -290,4 +289,5 @@ function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale, yScal
         });
       });
   }
+}
 }

@@ -36,7 +36,7 @@ function timeslider(min, max) {
     .append('line')
     .attr('x1', d => x(d)).attr('x2', d => x(d))
     .attr('y1', 0).attr('y2', height)
-    .style('stroke', '#ccc')
+    .style('stroke', '#ccc');
 
   // labels
   var labelL = g.append('text')
@@ -110,12 +110,12 @@ function timeslider(min, max) {
       .on("mousedown touchstart", brushcentered);
 
     function brushcentered() {
-    var dx = x(1) - x(0), // Use a fixed width when recentering.
-    cx = d3.mouse(this)[0],
-    x0 = cx - dx / 2,
-    x1 = cx + dx / 2;
-    d3.select(this.parentNode).call(brush.move, x1 > width ? [width - dx, width] : x0 < 0 ? [0, dx] : [x0, x1]);
-  }
+      var dx = x(1) - x(0), // Use a fixed width when recentering.
+      cx = d3.mouse(this)[0],
+      x0 = cx - dx / 2,
+      x1 = cx + dx / 2;
+      d3.select(this.parentNode).call(brush.move, x1 > width ? [width - dx, width] : x0 < 0 ? [0, dx] : [x0, x1]);
+    }
 
     // select entire range
     gBrush.call(brush.move, myrange.map(x));
