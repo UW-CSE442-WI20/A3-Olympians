@@ -88,9 +88,17 @@ export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, col
         //Create the tooltip label
         svg.append("text")
           .attr("id", "tooltip")
-          .attr("x", xPosition)
-          .attr("y", yPosition)
-          .attr("text-anchor", "right")
+          .attr("x", () => {
+              if (xPosition < innerWidth / 4) {
+                return xPosition;
+              } else return xPosition - d.Name.length * 10;
+            })
+            .attr("y", () => {
+                if (yPosition > innerHeight / 10) {
+                  return yPosition;
+                } else return yPosition + 20;
+              })
+          .attr("text-anchor", "center")
           .attr("font-family", "sans-serif")
           .attr("font-size", "11px")
           .attr("font-weight", "bold")
@@ -236,9 +244,17 @@ export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale
         //Create the tooltip label
         svg.append("text")
           .attr("id", "tooltip")
-          .attr("x", xPosition)
-          .attr("y", yPosition)
-          .attr("text-anchor", "right")
+          .attr("x", () => {
+              if (xPosition < innerWidth / 4) {
+                return xPosition;
+              } else return xPosition - d.Name.length * 10;
+            })
+          .attr("y", () => {
+            if (yPosition > innerHeight / 10) {
+              return yPosition;
+            } else return yPosition + 20;
+          })
+          .attr("text-anchor", "center")
           .attr("font-family", "sans-serif")
           .attr("font-size", "11px")
           .attr("font-weight", "bold")

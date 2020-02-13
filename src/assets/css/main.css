@@ -44,11 +44,20 @@
   grid-area: smallchart;
   display: flex;
   margin-bottom: 15px;
+	/* background-color: Gray; */
 }
 
 .grid-element.searchbar {
   grid-area: searchbar;
   display: flex;
+}
+
+.autocomplete {
+  /*the container must be positioned relative:*/
+  position: relative;
+  display: inline-block;
+  width: 300px;
+  margin-top: 10px;
 }
 
 .grid-element.nocfilter {
@@ -60,16 +69,20 @@
 .dropdown {
 	/* padding: 0 50px; */
 	/* display: block; */
-	display: block;
+	display: flex;
+	margin-right: 10%;
 }
 
 .dropdown select {
 	margin-top: 10px;
-	width: fill;
-  height: 17em;
+	margin-left: 10%;
+	/* margin-left: 40%; */
+	/* width: fill; */
+	width: 7em;
+  height: 18em;
 }
 
-h1, .dropdown p, .controls p {
+h1, .dropdown p, .controls p, text {
 	-moz-osx-font-smoothing: grayscale;
 	-webkit-font-smoothing: antialiased;
 	font-family: FontAwesome;
@@ -82,7 +95,15 @@ h1, .dropdown p, .controls p {
 	text-align: center;
 }
 
-	html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+.axis path {
+  stroke: none;
+}
+
+.axis text {
+	font-size: 100%;
+}
+
+	html, body, .axis text, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
 		margin: 0;
 		padding: 0;
 		border: 0;
