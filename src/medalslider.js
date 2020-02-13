@@ -128,7 +128,7 @@ function medalslider(min, max) {
         return range
     }
     console.log("medalslider called", min, max);
-    return {getRange: getRange}
+    return {getRange: getRange};
 }
 
 //// HELPER FUNCTION
