@@ -127,7 +127,7 @@ function olympicamountslider(min, max) {
         var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
         return range;
     }
-
+    console.log("olympicamountslider called");
     return {getRange: getRange}
 }
 

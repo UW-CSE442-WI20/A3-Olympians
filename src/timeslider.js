@@ -123,9 +123,10 @@ function timeslider(min, max) {
     var getRange = function() {
       var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
       range = determineYear(range, slidervalues);
-      return range }
-
-     return {getRange: getRange}
+      return range; 
+    }
+    console.log("timeslider has been called");
+    return {getRange: getRange}
   }
 
 //// HELPER FUNCTION

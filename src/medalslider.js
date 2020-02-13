@@ -127,7 +127,7 @@ function medalslider(min, max) {
         var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
         return range
     }
-
+    console.log("medalslider called");
     return {getRange: getRange}
 }
 
