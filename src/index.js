@@ -1121,11 +1121,11 @@ d3.csv(csvFile).then(function(data) {
   // initialize x axis domain based on data
   //xScale.domain(data.map(xValue));
   // initialize timeSlider
-  initializeTimeSlider();
+  // initializeTimeSlider();
   // initialize medalSlider
-  initializeMedalSlider();
+  // initializeMedalSlider();
  // initialize olympicSlider
-  initializeOlympicAmountSlider();
+  // initializeOlympicAmountSlider();
   // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
   autocomplete(document.getElementById("searchbar"));
