@@ -183,7 +183,7 @@ function generateAthleteChart(data, smallsvg) {
         .on("mouseover", function (d) {//Get this circle's x/y values, then augment for the tooltip
             //Create the tooltip label
             smallsvg.append("text")
-                .attr("id", "tooltip")
+                .attr("id", "swimming-event")
                 .attr("text-anchor", "middle")
                 .attr("transform", "translate(" + (smallWidth / 2) + "," + (innerSmallHeight / 3) + ")")
                 .attr("font-family", "sans-serif")
@@ -191,10 +191,10 @@ function generateAthleteChart(data, smallsvg) {
                 .attr("font-weight", "bold")
                 .attr("fill", "black")
                 .style("pointer-events", "none")
-                .text(d.grpEvent);
+                .text(d.grpEvent.substring(9));
         })
         .on("mouseout", function () {// Remove the tooltip
-            d3.select("#tooltip").remove();
+            d3.select("#swimming-event").remove();
         });
 
     // now add titles to the axes
