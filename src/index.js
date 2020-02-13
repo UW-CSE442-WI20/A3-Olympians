@@ -539,7 +539,7 @@ function timeslider(min, max) {
       .extent([[0,0], [width, height]])
       .on('brush', function() {
         var s = d3.event.selection;
-        var svg = d3.select('svg');
+        var svg = d3.select('#mainsvg svg');//d3.select('svg');
         var val = s.map(d => Math.round(x.invert(d)));
         svg.node().value = determineYear(val, slidervalues);
         console.log("time svg", svg);
@@ -697,7 +697,10 @@ function generateAthleteChart(data) {
         }
     });
 
-    var smallsvg = d3.select("#small-chart svg");
+    var smallsvg = d3.select('#smallchart')
+      .append('svg')
+      .attr('width',400)
+      .attr('height',400);
 
     smallsvg.selectAll("g").transition();
     smallsvg.selectAll("g").remove();
