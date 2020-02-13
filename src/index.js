@@ -243,13 +243,12 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
     if (hasEnoughMedals) {
       peopleNames.push(item.Name);
     } else {
-      console.log("in here");
         d3.selectAll(".c" + item.Name.substr(0, item.Name.indexOf(" ")))
           .transition()
           .style("opacity", 0)
           .duration(2000)
           .remove();
-          d3.selectAll(".l" + item.Name.substr(0, item.Name.indexOf(" ")))
+        d3.selectAll(".l" + item.Name.substr(0, item.Name.indexOf(" ")))
           .transition()
           .style("opacity", 0)
           .duration(2000)
