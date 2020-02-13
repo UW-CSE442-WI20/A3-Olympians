@@ -11,7 +11,7 @@ const _ = require("underscore");
 // as a bar chart of medals over time
 
 module.exports =
-function generateAthleteChart(data) {
+function generateAthleteChart(data, smallsvg) {
 
     const containsYear = (groups, year) => {
         return _.find(d3.values(groups), function (item) {
@@ -67,18 +67,16 @@ function generateAthleteChart(data) {
         }
     });
 
-    var smallsvg = d3.select("#small-chart");
-
     smallsvg.selectAll("g").transition();
     smallsvg.selectAll("g").remove();
     smallsvg.selectAll("text").remove();
     smallsvg.selectAll("g").transition();
 
-    var smallWidth = 500;
+    var smallWidth = 420;
     var smallHeight = 400;
 
     var smallMargin = {
-        left: 60,
+        left: 30,
         top: 30,
         right: 30,
         bottom: 60
@@ -207,7 +205,7 @@ function generateAthleteChart(data) {
 
     smallsvg.append("text")
         .attr("text-anchor", "middle") // this makes it easy to centre the text as the transform is applied to the anchor
-        .attr("transform", "translate(" + (smallWidth / 2) + "," + (smallHeight - smallMargin.bottom / 10) + ")") // centre below axis
+        .attr("transform", "translate(" + (smallWidth / 2) + "," + (smallHeight - smallMargin.bottom / 5) + ")") // centre below axis
         .text("Year Competed");
 
     console.log("athlete chart here", data);

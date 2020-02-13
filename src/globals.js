@@ -42,6 +42,8 @@ export var entriesByStartThenName;
 // lists all NOCs
 export var NOCs = [];
 
+//export var smallsvg;
+
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
@@ -59,6 +61,28 @@ export const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 // get the svg
 export var svg = d3.select('svg');
+
+// get the small svg
+export var smallsvg = d3.select('#smallchart')
+      .append('svg')
+      .attr('width',420)
+      .attr('height',400);
+  smallsvg.append("rect")
+      .attr("x", 5)
+      .attr("y", 14)
+      .attr("width", 410)
+      .attr("height", 386)
+      .style("fill", "none")
+      .style("stroke", "#00cdcf")
+      .style("stroke-width", 2);
+  smallsvg.append("text")
+      .attr("x", 70)
+      .attr("y", 200)
+      .text("Hover over a swimmer’s dot...");
+  smallsvg.append("text")
+    .attr("x", 70)
+    .attr("y", 250)
+    .text("...then hover over their medals.");
 
 // for plotting points
 export const xValue = d => d.Order;

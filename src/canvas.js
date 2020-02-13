@@ -10,7 +10,7 @@ const generateAthleteChart = require("./athletechart");
 // function to draw lines and points given inputData
 // with opacity animation included
 module.exports = {
-redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
+redraw(svg, smallsvg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
   if (typeof inputData !== 'undefined') {
 
     // update the X-axis
@@ -140,7 +140,7 @@ redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, 
 // and pushing them back out to their new, evenly spaced
 // positions
 // Note: currently does not support .exit() functionality
-redrawWithAnimation(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
+redrawWithAnimation(svg, smallsvg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
   if (typeof inputData !== 'undefined') {
 
     // update the X-axis
@@ -269,7 +269,7 @@ redrawWithAnimation(svg, chart, inputData, entriesByName, xScale, yScale, colorS
         var athleteData = _.find(d3.values(entriesByName), function(item) {
           return item.key === d.Name;
         });
-        generateAthleteChart(athleteData.values);
+        generateAthleteChart(athleteData.values, smallsvg);
       })
       .on("mouseout", function() {
         // back to small circles
