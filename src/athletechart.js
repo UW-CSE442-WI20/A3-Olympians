@@ -9,7 +9,9 @@ const _ = require("underscore");
 
 // function to generate individual athlete chart
 // as a bar chart of medals over time
-export function generateAthleteChart(data) {
+
+module.exports =
+function generateAthleteChart(data) {
 
     const containsYear = (groups, year) => {
         return _.find(d3.values(groups), function (item) {

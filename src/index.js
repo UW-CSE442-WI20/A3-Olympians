@@ -271,7 +271,7 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
 
 // initialize the medalslider
 function initializeMedalSlider() {
-  var myMedalSlider = medalslider.medalslider(1, 28);
+  var myMedalSlider = medalslider(1, 28);
   d3.select('#medalsEventHandler')
     .on('change', function() {
       // get min and max medal medal counts
@@ -289,7 +289,7 @@ function initializeMedalSlider() {
 
 // initialize the olympicslider
 function initializeOlympicAmountSlider() {
-  var myOlympicAmountSlider = olympicamountslider.olympicamountslider(1, 5);
+  var myOlympicAmountSlider = olympicamountslider(1, 5);
   d3.select('#olympicAmountEventHandler')
     .on('change', function() {
       // get min and max participation counts
@@ -351,7 +351,7 @@ function autocomplete(input) {
           /*close the list of autocompleted values,
           (or any other open lists of autocompleted values:*/
           closeAllLists();
-          generateAthleteChart.generateAthleteChart(_.find(d3.values(entriesByName), function(item) {
+          generateAthleteChart(_.find(d3.values(entriesByName), function(item) {
             return item.key === input.value;
           }).values);
         });
@@ -431,7 +431,7 @@ function autocomplete(input) {
 
 // initialize the timeslider
 function initializeTimeSlider() {
-  var mySlider = timeslider.timeslider(1896, 2016);
+  var mySlider = timeslider(1896, 2016);
   // Initial start and end years
   updateTimeSlider([1896, 2016]);
   // when the input range changes, update the start and end years
