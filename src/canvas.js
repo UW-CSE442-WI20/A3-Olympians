@@ -1,9 +1,11 @@
 const d3 = require("d3");
 const _ = require("underscore");
 
-import {
-  generateAthleteChart
-} from './athletechart';
+const generateAthleteChart = require("./athletechart");
+
+// import {
+//   generateAthleteChart
+// } from './athletechart';
 
 // function to draw lines and points given inputData
 // with opacity animation included
