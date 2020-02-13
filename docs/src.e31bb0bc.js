@@ -30748,10 +30748,10 @@ module.exports = function generateAthleteChart(data, smallsvg) {
   }).attr("r", 10).on("mouseover", function (d) {
     //Get this circle's x/y values, then augment for the tooltip
     //Create the tooltip label
-    smallsvg.append("text").attr("id", "tooltip").attr("text-anchor", "middle").attr("transform", "translate(" + smallWidth / 2 + "," + innerSmallHeight / 3 + ")").attr("font-family", "sans-serif").attr("font-size", "11px").attr("font-weight", "bold").attr("fill", "black").style("pointer-events", "none").text(d.grpEvent);
+    smallsvg.append("text").attr("id", "swimming-event").attr("text-anchor", "middle").attr("transform", "translate(" + smallWidth / 2 + "," + innerSmallHeight / 3 + ")").attr("font-family", "sans-serif").attr("font-size", "11px").attr("font-weight", "bold").attr("fill", "black").style("pointer-events", "none").text(d.grpEvent.substring(9));
   }).on("mouseout", function () {
     // Remove the tooltip
-    d3.select("#tooltip").remove();
+    d3.select("#swimming-event").remove();
   }); // now add titles to the axes
 
   smallsvg.append("text").attr("text-anchor", "middle") // this makes it easy to centre the text as the transform is applied to the anchor
@@ -32085,7 +32085,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50632" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51313" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
