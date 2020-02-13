@@ -29,6 +29,8 @@ function timeslider(min, max) {
     .append('g')
     .attr('transform', "translate(90,0)");
 
+  console.log("time g", g);
+
   // draw background lines
   g.append('g').selectAll('line')
     .data(slidervalues) //d3.range(myrange[0], myrange[1]+1))

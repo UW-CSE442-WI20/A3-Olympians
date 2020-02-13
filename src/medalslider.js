@@ -27,6 +27,7 @@ function medalslider(min, max) {
     const g = d3.select("#medalSlider")
         .append('g')
         .attr('transform', "translate(90,0)");
+    console.log("medal g", g);
 
     //draw background lines
     g.append('g').selectAll('line')
