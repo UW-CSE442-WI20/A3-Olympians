@@ -8,7 +8,10 @@
     "build": "parcel build src/index.html --public-url https://uw-cse442-wi20.github.io/A3-olympians/; rm -rf docs; mv dist docs;",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "files": ["src/*", "data/*"],
+  "files": [
+    "src/*",
+    "data/*"
+  ],
   "author": "",
   "devDependencies": {
     "parcel-bundler": "^1.12.4"
