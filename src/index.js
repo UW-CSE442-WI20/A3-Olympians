@@ -6,18 +6,22 @@
 
 const d3 = require("d3");
 const _ = require("underscore");
-import {
-  timeslider
-} from './timeslider';
-import {
-  medalslider
-} from './medalslider';
-import {
-  olympicamountslider
-} from './olympicamountslider';
-import {
-  generateAthleteChart
-} from './athletechart';
+const timeslider = require("./timeslider");
+const medalslider = require("./medalslider");
+const olympicamountslider = require("./olympicamountslider");
+const generateAthleteChart = require("./athletechart");
+// import {
+//   timeslider
+// } from './timeslider';
+// import {
+//   medalslider
+// } from './medalslider';
+// import {
+//   olympicamountslider
+// } from './olympicamountslider';
+// import {
+//   generateAthleteChart
+// } from './athletechart';
 
 var {
   outerWidth,
