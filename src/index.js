@@ -7,9 +7,9 @@
 const d3 = require("d3");
 const _ = require("underscore");
 // const timeslider = require("./timeslider");
-const medalslider = require("./medalslider");
-const olympicamountslider = require("./olympicamountslider");
-const generateAthleteChart = require("./athletechart");
+// const medalslider = require("./medalslider");
+// const olympicamountslider = require("./olympicamountslider");
+// const generateAthleteChart = require("./athletechart");
 // import {
 //   timeslider
 // } from './timeslider';
@@ -635,8 +635,478 @@ function timeslider(min, max) {
     return val;
   }
 
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// INDIVIDUAL ATHLETE'S MEDAL CHART
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
 
+function generateAthleteChart(data) {
 
+    const containsYear = (groups, year) => {
+        return _.find(d3.values(groups), function (item) {
+            return item.key === year;
+        });
+    }
+
+    const getMedalCount = (year, medal) => {
+        var numMedals = 0;
+        data.forEach(function (item) {
+            if (item.Medal === medal && item.Year === year) numMedals++;
+        });
+        return numMedals;
+    }
+
+    const groupData = [];
+
+    const getEvents = (year, medal) => {
+        var events = [];
+        data.forEach(function (item) {
+            if (item.Year === year && item.Medal === medal) {
+                events.push(item.Swim_Event);
+            }
+        })
+        return events;
+    }
+
+    data.forEach(function (item) {
+        var bronze = getMedalCount(item.Year, 'Bronze');
+        var silver = getMedalCount(item.Year, 'Silver');
+        var gold = getMedalCount(item.Year, 'Gold');
+
+        var bronzeEvents = getEvents(item.Year, 'Bronze');
+        var silverEvents = getEvents(item.Year, 'Silver');
+        var goldEvents = getEvents(item.Year, 'Gold');
+
+        if (containsYear(groupData, item.Year) === undefined) {
+            var medalMap = [];
+            for (let i = 1; i <= bronze; i++) {
+                medalMap.push({grpName: 'Bronze', grpValue: i, grpEvent: bronzeEvents[i - 1]});
+            }
+            for (let i = 1; i <= silver; i++) {
+                medalMap.push({grpName: 'Silver', grpValue: i, grpEvent: silverEvents[i - 1]});
+            }
+            for (let i = 1; i <= gold; i++) {
+                medalMap.push({grpName: 'Gold', grpValue: i, grpEvent: goldEvents[i - 1]});
+            }
+
+            groupData.push(new Object(
+                {
+                    key: item.Year, values: medalMap
+                }))
+        }
+    });
+
+    var smallsvg = d3.select("#small-chart");
+
+    smallsvg.selectAll("g").transition();
+    smallsvg.selectAll("g").remove();
+    smallsvg.selectAll("text").remove();
+    smallsvg.selectAll("g").transition();
+
+    var smallWidth = 500;
+    var smallHeight = 400;
+
+    var smallMargin = {
+        left: 60,
+        top: 30,
+        right: 30,
+        bottom: 60
+    };
+
+    var innerSmallWidth = smallWidth - smallMargin.left - smallMargin.right;
+    var innerSmallHeight = smallHeight - smallMargin.top - smallMargin.bottom;
+
+    var x = d3.scaleLinear().rangeRound([0, smallWidth], 0.5);
+    var y = d3.scaleLinear().rangeRound([smallHeight, 0]);
+
+    x.domain(data.map(function (d) {
+        return d.year;
+    }));
+    y.domain([0, d3.max(groupData, function (key) {
+        return d3.max(key.values, function (d) {
+            return d.grpValue;
+        });
+    })]);
+
+    const getXDomain = () => {
+        var domain = [];
+        for (let i = +data[0].Start - 4; i <= +data[0].End + 4; i += 4) {
+            domain.push(i);
+        }
+        return domain;
+    }
+
+    const xSmallScale = d3.scaleBand().domain(getXDomain()).range([smallMargin.left, innerSmallWidth]);
+    const ySmallScale = d3.scaleLinear().domain([10, 0]).range([smallMargin.bottom, innerSmallHeight]);
+
+    const getTickValues = (startTick, endTick) => {
+        var values = [];
+        for (var i = startTick; i <= endTick; i += 4) {
+            values.push(i)
+        }
+        return values;
+    }
+
+    const xSmallAxis = d3.axisBottom(xSmallScale)
+        .tickPadding(30)
+        .tickValues(getTickValues(+data[0].Start, +data[0].End))
+        .tickFormat(d3.format("Y"))
+    const ySmallAxis = d3.axisLeft(ySmallScale)
+
+    // add title: athlete name and country
+    smallsvg.append("text")
+        .attr("x", smallWidth / 2)
+        .attr("y", smallHeight - innerSmallHeight - 1.3 * smallMargin["top"])
+        .style("text-anchor", "middle")
+        .text(data[0].Name + "  (" + data[0].NOC + ")");
+
+    // add axis groups to smallsvg
+    const xSmallAxisGroup = smallsvg.append("g")
+        .attr("class", "axis x")
+        .attr("transform", "translate(0," + innerSmallHeight + ")")
+        .call(xSmallAxis);
+
+    var x1 = d3.scaleBand();
+    var medalTypes = groupData[0].values.map(function (d) {
+        return d.grpName;
+    });
+    x1.domain(medalTypes).rangeRound([0, 30]);
+
+    var slice = smallsvg.selectAll(".slice")
+        .data(groupData)
+        .enter().append("g")
+        .attr("class", "g")
+        .attr("transform", function (d) {
+            return "translate(" + xSmallScale(d.key) + ",0)";
+        });
+
+    var color = medalType => {
+        if (medalType === 'Bronze') return "#CD7F32";
+        else if (medalType === 'Silver') return "#C0C0C0";
+        else return "#D4AF37";
+    }
+
+    var cxOffset = medalType => {
+        if (medalType === 'Bronze') {
+            return 0.3;
+        } else if (medalType === 'Silver') {
+            return 0.5;
+        } else {
+            return 0.7;
+        }
+    }
+
+    slice.selectAll("circle")
+        .data(function (d) {
+            return d.values;
+        })
+        .enter().append("circle")
+        .style("fill", function (d) {
+            return color(d.grpName)
+        })
+        .attr("cx", function (d) {
+            return cxOffset(d.grpName) * xSmallScale.bandwidth();
+        })
+        .attr("cy", function (d) {
+            return ySmallScale(d.grpValue - 1.5) - 30
+        })
+        .attr("r", 10)
+        .on("mouseover", function (d) {//Get this circle's x/y values, then augment for the tooltip
+            //Create the tooltip label
+            smallsvg.append("text")
+                .attr("id", "tooltip")
+                .attr("text-anchor", "middle")
+                .attr("transform", "translate(" + (smallWidth / 2) + "," + (innerSmallHeight / 3) + ")")
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "11px")
+                .attr("font-weight", "bold")
+                .attr("fill", "black")
+                .style("pointer-events", "none")
+                .text(d.grpEvent);
+        })
+        .on("mouseout", function () {// Remove the tooltip
+            d3.select("#tooltip").remove();
+        });
+
+    // now add titles to the axes
+    smallsvg.append("text")
+        .attr("text-anchor", "middle") // this makes it easy to centre the text as the transform is applied to the anchor
+        .attr("transform", "translate(" + smallMargin.left + "," + (smallHeight / 2) + ")rotate(-90)") // text is drawn off the screen top left, move down and out and rotate
+        .text("Medals Won");
+
+    smallsvg.append("text")
+        .attr("text-anchor", "middle") // this makes it easy to centre the text as the transform is applied to the anchor
+        .attr("transform", "translate(" + (smallWidth / 2) + "," + (smallHeight - smallMargin.bottom / 10) + ")") // centre below axis
+        .text("Year Competed");
+
+    console.log("athlete chart here", data);
+}
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// CAREER SLIDER
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+function olympicamountslider(min, max) {
+    var myrange = [min, max + 1];
+    //var slidervalues = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,
+    //  15,16,17,18,19,20,21,22,23,24,25,26,27,28];
+    // set width and height of slider control
+    var w = 400;
+    var h = 300;
+    var controlMargin = {top: 140, bottom: 145, left: 40, right: 40};
+    // dimensions of slider bar
+    var width = w - controlMargin.left - controlMargin.right;
+    var height = h - controlMargin.top - controlMargin.bottom;
+    // create x scale
+    var x = d3.scaleLinear()
+        .domain(myrange)  // data space
+        .range([0, width]);  // display space
+
+    // create translated g
+    const g = d3.select("#olympicAmountSlider")
+        .append('g')
+        .attr('transform', "translate(90,0)");
+
+    console.log("career g", g);
+
+    // draw background lines
+    g.append('g').selectAll('line')
+        .data(d3.range(myrange[0], myrange[1] + 1))
+        .enter()
+        .append('line')
+        .attr('x1', d => x(d)).attr('x2', d => x(d))
+        .attr('y1', 0).attr('y2', height)
+        .style('stroke', '#ccc')
+
+    // labels
+    var labelL = g.append('text')
+        .attr('id', 'labelleft')
+        .attr('x', 0)
+        .attr('y', height + 15)
+        .text(myrange[0]);
+    var labelR = g.append('text')
+        .attr('id', 'labelright')
+        .attr('x', 0)
+        .attr('y', height + 15)
+        .text(myrange[1]);
+
+    // define brush
+    var brush = d3.brushX()
+        .extent([[0, 0], [width, height]])
+        .on('brush', function () {
+            var s = d3.event.selection;
+            var svg = d3.select('svg');
+            svg.node().value = s.map(d => Math.round(x.invert(d)));
+            console.log("career slider svg", svg);
+            //svg.node().value = determineYear(val, slidervalues);
+            // update and move labels
+            labelL.attr('x', s[0])
+                .text(svg.node().value[0]);
+            labelR.attr('x', s[1])
+                .text(svg.node().value[1]);
+            // move brush handles
+            handle
+                .attr("display", null)
+                .attr("transform", function (d, i) {
+                    return "translate(" + [s[i], -height / 4] + ")";
+                });  // CHANGE HANDLE POSITION HERE
+            svg.node().dispatchEvent(new CustomEvent("input"));
+        })
+        .on('end', () => {
+            // update view
+            // view should only be updated after brushing is over
+            let event = new Event("change");
+            olympicAmountEventHandler.dispatchEvent(event);
+        });
+
+    // append brush to g
+    var gBrush = g.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    // add brush handles (from https://bl.ocks.org/Fil/2d43867ba1f36a05459c7113c7f6f98a)
+    var brushResizePath = function (d) {
+        var e = +(d.type == "e"),
+            x = e ? 1 : -1,
+            y = height / 2;
+        return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) +
+            "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) +
+            "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+    };
+
+    var handle = gBrush.selectAll(".handle--custom")
+        .data([{type: "w"}, {type: "e"}])
+        .enter().append("path")
+        .attr("class", "handle--custom")
+        .attr("transform", "translate(10,10)")
+        .attr("stroke", "#00cdcf")
+        .attr("stroke-width", 1.5)
+        .attr("fill", "#00cdcf")
+        .attr("cursor", "ew-resize")
+        .attr("d", brushResizePath);  // the brush shape
+
+    // override default behaviour - clicking outside of the selected area
+    // will select a small piece there rather than deselecting everything
+    // https://bl.ocks.org/mbostock/6498000
+    gBrush.selectAll(".overlay")
+        .each(function (d) {
+            d.type = "selection";
+        })
+        .on("mousedown touchstart", brushcentered);
+
+    function brushcentered() {
+        var dx = x(1) - x(0), // Use a fixed width when recentering.
+            cx = d3.mouse(this)[0],
+            x0 = cx - dx / 2,
+            x1 = cx + dx / 2;
+        d3.select(this.parentNode).call(brush.move, x1 > width ? [width - dx, width] : x0 < 0 ? [0, dx] : [x0, x1]);
+    }
+
+    // select entire range
+    gBrush.call(brush.move, myrange.map(x));
+
+    var getRange = function () {
+        var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
+        return range;
+    }
+    console.log("olympicamountslider called", min, max);
+    return {getRange: getRange}
+}
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+// MEDAL SLIDER
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+function medalslider(min, max) {
+    var myrange = [min, max + 1];
+    //var slidervalues = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,
+    //  15,16,17,18,19,20,21,22,23,24,25,26,27,28];
+    // set width and height of slider control
+    var w = 400;
+    var h = 300;
+    var controlMargin = {top: 140, bottom: 145, left: 40, right: 40};
+    // dimensions of slider bar
+    var width = w - controlMargin.left - controlMargin.right;
+    var height = h - controlMargin.top - controlMargin.bottom;
+    // create x scale
+    var x = d3.scaleLinear()
+        .domain(myrange)  // data space
+        .range([0, width]);  // display space
+
+    // create translated g
+    const g = d3.select("#medalSlider")
+        .append('g')
+        .attr('transform', "translate(90,0)");
+    console.log("medal g", g);
+
+    //draw background lines
+    g.append('g').selectAll('line')
+        .data(d3.range(myrange[0], myrange[1] + 1))
+        .enter()
+        .append('line')
+        .attr('x1', d => x(d)).attr('x2', d => x(d))
+        .attr('y1', 0).attr('y2', height)
+        .style('stroke', '#ccc')
+
+    // labels
+    var labelL = g.append('text')
+        .attr('id', 'labelleft')
+        .attr('x', 0)
+        .attr('y', height + 15)
+        .text(myrange[0]);
+    var labelR = g.append('text')
+        .attr('id', 'labelright')
+        .attr('x', 0)
+        .attr('y', height + 15)
+        .text(myrange[1]);
+
+    // define brush
+    var brush = d3.brushX()
+        .extent([[0, 0], [width, height]])
+        .on('brush', function () {
+            var s = d3.event.selection;
+            var svg = d3.select('svg');
+            svg.node().value = s.map(d => Math.round(x.invert(d)));
+            console.log("medals svg", svg);
+            //svg.node().value = determineYear(val, slidervalues);
+            // update and move labels
+            labelL.attr('x', s[0])
+                .text(svg.node().value[0]);
+            labelR.attr('x', s[1])
+                .text(svg.node().value[1]);
+            // move brush handles
+            handle
+                .attr("display", null)
+                .attr("transform", function (d, i) {
+                    return "translate(" + [s[i], -height / 4] + ")";
+                });  // CHANGE HANDLE POSITION HERE
+            svg.node().dispatchEvent(new CustomEvent("input"));
+        })
+        .on('end', () => {
+            // update view
+            // view should only be updated after brushing is over
+            let event = new Event("change");
+            medalsEventHandler.dispatchEvent(event);
+        });
+
+    // append brush to g
+    var gBrush = g.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    // add brush handles (from https://bl.ocks.org/Fil/2d43867ba1f36a05459c7113c7f6f98a)
+    var brushResizePath = function (d) {
+        var e = +(d.type == "e"),
+            x = e ? 1 : -1,
+            y = height / 2;
+        return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) +
+            "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) +
+            "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+    };
+
+    var handle = gBrush.selectAll(".handle--custom")
+        .data([{type: "w"}, {type: "e"}])
+        .enter().append("path")
+        .attr("class", "handle--custom")
+        .attr("transform", "translate(10,10)")
+        .attr("stroke", "#00cdcf")
+        .attr("stroke-width", 1.5)
+        .attr("fill", "#00cdcf")
+        .attr("cursor", "ew-resize")
+        .attr("d", brushResizePath);  // the brush shape
+
+    // override default behaviour - clicking outside of the selected area
+    // will select a small piece there rather than deselecting everything
+    // https://bl.ocks.org/mbostock/6498000
+    gBrush.selectAll(".overlay")
+        .each(function (d) {
+            d.type = "selection";
+        })
+        .on("mousedown touchstart", brushcentered);
+
+    function brushcentered() {
+        var dx = x(1) - x(0), // Use a fixed width when recentering.
+            cx = d3.mouse(this)[0],
+            x0 = cx - dx / 2,
+            x1 = cx + dx / 2;
+        d3.select(this.parentNode).call(brush.move, x1 > width ? [width - dx, width] : x0 < 0 ? [0, dx] : [x0, x1]);
+    }
+
+    // select entire range
+    gBrush.call(brush.move, myrange.map(x));
+
+    var getRange = function () {
+        var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
+        return range
+    }
+    console.log("medalslider called", min, max);
+    return {getRange: getRange};
+}
 
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
