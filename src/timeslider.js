@@ -58,6 +58,7 @@ function timeslider(min, max) {
         var svg = d3.select('svg');
         var val = s.map(d => Math.round(x.invert(d)));
         svg.node().value = determineYear(val, slidervalues);
+        console.log("time svg", svg);
       // update and move labels
       labelL.attr('x', s[0])
         .text(svg.node().value[0]);

@@ -56,6 +56,7 @@ function medalslider(min, max) {
             var s = d3.event.selection;
             var svg = d3.select('svg');
             svg.node().value = s.map(d => Math.round(x.invert(d)));
+            console.log("medals svg", svg);
             //svg.node().value = determineYear(val, slidervalues);
             // update and move labels
             labelL.attr('x', s[0])
