@@ -81,11 +81,11 @@ var {
   // add group for the visualization
   chart
 } = require('./globals');
-import {
-  redraw,
-  redrawWithAnimation
-} from './canvas';
-
+// import {
+//   redraw,
+//   redrawWithAnimation
+// } from './canvas';
+const {redraw, redrawWithAnimation} = require( './canvas');
 
 const csvFile = require('../data/olympic_overall.csv');
 

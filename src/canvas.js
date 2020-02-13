@@ -9,7 +9,8 @@ const generateAthleteChart = require("./athletechart");
 
 // function to draw lines and points given inputData
 // with opacity animation included
-export function redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
+module.exports = 
+function redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
   if (typeof inputData !== 'undefined') {
 
     // update the X-axis
