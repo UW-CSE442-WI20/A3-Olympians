@@ -608,7 +608,7 @@ function timeslider(min, max) {
     var getRange = function() {
       var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
       range = determineYear(range, slidervalues);
-      return range; 
+      return range;
     }
     console.log("timeslider has been called", min, max);
     return {getRange: getRange}
@@ -697,7 +697,7 @@ function generateAthleteChart(data) {
         }
     });
 
-    var smallsvg = d3.select("#small-chart");
+    var smallsvg = d3.select("#small-chart svg");
 
     smallsvg.selectAll("g").transition();
     smallsvg.selectAll("g").remove();
