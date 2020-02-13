@@ -6,8 +6,8 @@
 
 const d3 = require("d3");
 
-module.exports =
-function timeslider(min, max) {
+module.exports = {
+timeslider(min, max) {
   var myrange = [min, max + 1];
   var slidervalues = [1896, 1900, 1904, 1908, 1912, 1916, 1920, 1924, 1928, 1932,
     1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980,
@@ -74,7 +74,7 @@ function timeslider(min, max) {
         svg.node().dispatchEvent(new CustomEvent("input"));
         let event = new Event("change");
         timeEventHandler.dispatchEvent(event);
-      })
+      });
 
     // append brush to g
     var gBrush = g.append("g")
@@ -125,27 +125,27 @@ function timeslider(min, max) {
       range = determineYear(range, slidervalues);
       return range; 
     }
-    console.log("timeslider has been called");
+    console.log("timeslider has been called", min, max);
     return {getRange: getRange}
   }
-
+}
 //// HELPER FUNCTION
 //// Round slider value to the nearest valid Olympic year
-  function determineYear(val, slidervalues) {
-    // get start year
-    for (let i = 0; i < slidervalues.length; i++) {
-      if (Math.abs(slidervalues[i] - val[0]) <= 3) {
-        val[0] = slidervalues[i];
-        break;
-      }
+function determineYear(val, slidervalues) {
+  // get start year
+  for (let i = 0; i < slidervalues.length; i++) {
+    if (Math.abs(slidervalues[i] - val[0]) <= 3) {
+      val[0] = slidervalues[i];
+      break;
     }
-    // get end year
-    for (let i = 0; i < slidervalues.length; i++) {
-      if (Math.abs(slidervalues[i] - val[1]) <= 3) {
-
-        val[1] = slidervalues[i];
-        break;
-      }
-    }
-    return val;
   }
+  // get end year
+  for (let i = 0; i < slidervalues.length; i++) {
+    if (Math.abs(slidervalues[i] - val[1]) <= 3) {
+
+      val[1] = slidervalues[i];
+      break;
+    }
+  }
+  return val;
+}

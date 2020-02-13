@@ -232,6 +232,7 @@ function setupNOCFiltering(data) {
 // minMedals - current min number of medals
 // maxMedals - current max number of medals
 function filterByMedal(data, medalCounts, minMedals, maxMedals) {
+  console.log("filter by medal called with data", data);
   if (typeof data === 'undefined') {
     return undefined;
   }

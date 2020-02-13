@@ -6,8 +6,8 @@
 
 const d3 = require("d3");
 
-module.exports =
-function medalslider(min, max) {
+module.exports = {
+medalslider(min, max) {
     var myrange = [min, max + 1];
     //var slidervalues = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,
     //  15,16,17,18,19,20,21,22,23,24,25,26,27,28];
@@ -127,8 +127,9 @@ function medalslider(min, max) {
         var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
         return range
     }
-    console.log("medalslider called");
+    console.log("medalslider called", min, max);
     return {getRange: getRange}
+}
 }
 
 //// HELPER FUNCTION
