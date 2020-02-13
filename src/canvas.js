@@ -140,7 +140,8 @@ function redraw(svg, chart, inputData, entriesByName, xScale, yScale, colorScale
 // and pushing them back out to their new, evenly spaced
 // positions
 // Note: currently does not support .exit() functionality
-export function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
+module.exports = 
+function redrawWithAnimation(svg, chart, inputData, entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder) {
   if (typeof inputData !== 'undefined') {
 
     // update the X-axis
