@@ -36,7 +36,6 @@
 	grid-area: controls;
 	display: flex;
 	padding: 0 5px;
-	/* margin-left: 30px; */
 	justify-content: center;
 }
 
@@ -45,14 +44,13 @@
 	display: flex;
 	margin-bottom: 10px;
 	margin-left: 5px;
-	/* background-color: Gray; */
 }
 
 .grid-element.searchbar {
   grid-area: searchbar;
   display: flex;
-  overflow: show;
-  max-height: 458px;
+  overflow: visible;
+  max-height: 0px;
 }
 
 .autocomplete {
@@ -90,9 +88,8 @@ input[type=submit] {
   border: 1px solid #d4d4d4;
   border-bottom: none;
   border-top: none;
-  /*z-index: 99;*/
   /*position the autocomplete items to be the same width as the container:*/
-  width: 332px;
+  width: 337px;
   top: 100%;
   left: 0;
   right: 0;
@@ -101,7 +98,6 @@ input[type=submit] {
 .autocomplete-items div {
   padding: 10px;
   cursor: pointer;
-  /*background-color: #fff;*/
   background-color: #00cdcf;
   border-bottom: 1px solid #d4d4d4;
 }
@@ -118,25 +114,21 @@ input[type=submit] {
 }
 
 .grid-element.nocfilter {
-  grid-area: nocfilter;
-  display: flex;
+	grid-area: nocfilter;
+	display: flex;
 	justify-content: center;
 }
 
 .dropdown {
-	/* padding: 0 50px; */
 	display: block;
-	/* display: flex; */
 	margin-right: 10%;
 }
 
 .dropdown select {
 	margin-top: 10px;
 	margin-left: 5%;
-	/* margin-left: 40%; */
 	width: fill;
-	/* width: 7em; */
-  height: 13em;
+	height: 13em;
 }
 
 h1, .dropdown p, .controls p, text {
@@ -160,52 +152,44 @@ h1, .dropdown p, .controls p, text {
 	font-size: 100%;
 }
 
-	html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
-		margin: 0;
-		padding: 0;
-		border: 0;
-		font-size: 100%;
-		font: inherit;
-		vertical-align: baseline;
-	}
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
 
-	article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
-		display: block;
-	}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+	display: block;
+}
 
-	body {
-		line-height: 1;
-	}
+body {
+	line-height: 1;
+}
 
-	ol, ul {
-		list-style: none;
-	}
+ol, ul {
+	list-style: none;
+}
 
-	blockquote, q {
-		quotes: none;
-	}
+blockquote, q {
+	quotes: none;
+}
 
-	blockquote:before, blockquote:after, q:before, q:after {
-		content: '';
-		content: none;
-	}
+blockquote:before, blockquote:after, q:before, q:after {
+	content: '';
+	content: none;
+}
 
-	table {
-		border-collapse: collapse;
-		border-spacing: 0;
-	}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
 
-	body {
-		-webkit-text-size-adjust: none;
-	}
-
-/* Box Model */
-/*
-	*, *:before, *:after {
-		-moz-box-sizing: border-box;
-		-webkit-box-sizing: border-box;
-		box-sizing: border-box;
-	}
+body {
+	-webkit-text-size-adjust: none;
+}
 
 /* Containers */
 
@@ -366,7 +350,7 @@ h1, .dropdown p, .controls p, text {
 
 	}
 
-/* Grid */
+	/* Grid */
 
 	.row {
 		border-bottom: solid 1px transparent;
