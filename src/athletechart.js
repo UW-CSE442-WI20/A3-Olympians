@@ -207,6 +207,4 @@ function generateAthleteChart(data, smallsvg) {
         .attr("text-anchor", "middle") // this makes it easy to centre the text as the transform is applied to the anchor
         .attr("transform", "translate(" + (smallWidth / 2) + "," + (smallHeight - smallMargin.bottom / 5) + ")") // centre below axis
         .text("Year Competed");
-
-    console.log("athlete chart here", data);
 }

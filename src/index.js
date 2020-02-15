@@ -10,19 +10,7 @@ const timeslider = require("./timeslider");
 const medalslider = require("./medalslider");
 const olympicamountslider = require("./olympicamountslider");
 const generateAthleteChart = require("./athletechart");
-// import {
-//   timeslider
-// } from './timeslider';
-// import {
-//   medalslider
-// } from './medalslider';
-// import {
-//   olympicamountslider
-// } from './olympicamountslider';
-// import {
-//   generateAthleteChart
-// } from './athletechart';
-// const generateAthleteChart = require("./athletechart");
+const autocomplete = require("./search");
 
 var {
   outerWidth,
@@ -39,7 +27,6 @@ var {
 
   minOrder,
   maxOrder,
-  // csvFile,
 
   medalCounts,
   medalRange,
@@ -82,10 +69,7 @@ var {
   // add group for the visualization
   chart
 } = require('./globals');
-// import {
-//   redraw,
-//   redrawWithAnimation
-// } from './canvas';
+
 const {redraw, redrawWithAnimation} = require( './canvas');
 
 const csvFile = require('../data/olympic_overall.csv');
@@ -212,13 +196,6 @@ function initializeDataStructures(data) {
 
 
 function setupNOCFiltering(data) {
-
-  // for (var key in entriesByNOC) {
-  //   if (!(entriesByNOC[key] in NOCs)) {
-  //     NOCs.push(entriesByNOC[key].key);
-  //   }
-  // }
-
   NOCtoCountry.forEach(function(item) {
     NOCs.push(item.value + " (" + item.key + ")");
   })
@@ -232,7 +209,6 @@ function setupNOCFiltering(data) {
     var activities = document.getElementById('select-NOC');
     var selectedOptions = activities.selectedOptions || [].filter.call(activities.options, option => option.selected);
     selectedValues = [].map.call(selectedOptions, option => option.value);
-    //var medals = document.getElementById('numMedals').value;
 
     // want all to fade and only the ones that remain to stay
     chart.selectAll("line")
@@ -283,7 +259,6 @@ function setupNOCFiltering(data) {
     }
 
     for (var i = 0; i < selectedValues.length; i++) {
-      //var filteredMedalData = filterByMedal(entriesByNOC[selectedValues[i]], medalCounts, medalRange[0], medalRange[1]);
       redrawWithAnimation(svg, smallsvg, chart, filterAll(entriesByNOC[selectedValues[i]]),
          entriesByName, xScale, yScale, colorScale, xAxis, xAxisGroup, xColumn, yColumn, colorColumn, circleRadius, minOrder, maxOrder);
     }
@@ -297,13 +272,11 @@ function setupNOCFiltering(data) {
 // minMedals - current min number of medals
 // maxMedals - current max number of medals
 function filterByMedal(data, medalCounts, minMedals, maxMedals) {
-  console.log("filter by medal called with data", data);
   if (typeof data === 'undefined') {
     return undefined;
   }
   let currMedals = [];
   for (var person in medalCounts) {
-    // console.log("person", person)
     if (medalCounts[person] >= minMedals && medalCounts[person] <= maxMedals) {
       currMedals.push(person);
     }
@@ -326,7 +299,11 @@ function filterByMedal(data, medalCounts, minMedals, maxMedals) {
     }
     return hasEnoughMedals;
   });
-  peopleNames = _.uniq(peopleNames, false);
+  uniquePeopleNames = _.uniq(peopleNames, false);
+  peopleNames.length = uniquePeopleNames.length;
+  for (let i = 0; i < uniquePeopleNames.length; i++) {
+    peopleNames[i] = uniquePeopleNames[i];
+  }
   currPeople = d3.nest()
     .key(function() {
       return data.key;
@@ -343,7 +320,7 @@ function initializeMedalSlider() {
       // get min and max medal medal counts
       medalRange = myMedalSlider.getRange();
       // redraw data within range selection
-      peopleNames = [];
+      peopleNames.length = 0;
       if (typeof selectedValues !== 'undefined') {
         for (let i = 0; i < selectedValues.length; i++) {
           redraw(svg, smallsvg, chart, filterAll(entriesByNOC[selectedValues[i]]),
@@ -361,7 +338,7 @@ function initializeOlympicAmountSlider() {
       // get min and max participation counts
       olympicAmountRange = myOlympicAmountSlider.getRange();
       // redraw data within range selection
-      peopleNames = [];
+      peopleNames.length = 0;
       if (typeof selectedValues !== 'undefined') {
         for (let i = 0; i < selectedValues.length; i++) {
           redraw(svg, smallsvg, chart, filterAll(entriesByNOC[selectedValues[i]]),
@@ -377,124 +354,6 @@ function filterAll (data) {
   return filterMedalsAndAmount;
 }
 
-
-function autocomplete(input) {
-  /*the autocomplete function takes two arguments,
-  the text field element and an array of possible autocompleted values:*/
-  var currentFocus;
-  /*execute a function when someone writes in the text field:*/
-  input.addEventListener("input", function(e) {
-    // a is the autocomplete outer div element
-    // b is the temporary variable used to store each option in the div
-    var a, b, val = this.value;
-    /*close any already open lists of autocompleted values*/
-    closeAllLists();
-    if (!val) {
-      return false;
-    }
-    currentFocus = -1;
-    /*create a DIV element that will contain the items (values):*/
-    a = document.createElement("DIV");
-    a.setAttribute("id", this.id + "autocomplete-list");
-    a.setAttribute("class", "autocomplete-items");
-    /*append the DIV element as a child of the autocomplete container:*/
-    this.parentNode.appendChild(a);
-    /*for each item in the array...*/
-    for (var i = 0; i < peopleNames.length; i++) {
-      /*check if the item starts with the same letters as the text field value:*/
-      if (peopleNames[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-        /*create a DIV element for each matching element:*/
-        b = document.createElement("DIV");
-        /*make the matching letters bold:*/
-        b.innerHTML = "<strong>" + peopleNames[i].substr(0, val.length) + "</strong>";
-        b.innerHTML += peopleNames[i].substr(val.length);
-        /*insert a input field that will hold the current array item's value:*/
-        b.innerHTML += "<input type='hidden' value='" + peopleNames[i] + "'>";
-        /*execute a function when someone clicks on the item value (DIV element):*/
-        b.addEventListener("click", function(e) {
-          /*insert the value for the autocomplete text field:*/
-          input.value = this.getElementsByTagName("input")[0].value;
-          /*close the list of autocompleted values,
-          (or any other open lists of autocompleted values:*/
-          closeAllLists();
-          generateAthleteChart(_.find(d3.values(entriesByName), function(item) {
-            return item.key === input.value;
-          }).values, smallsvg);
-        });
-        a.appendChild(b);
-      }
-    }
-  });
-  /*execute a function presses a key on the keyboard:*/
-  input.addEventListener("keydown", function(e) {
-    var currSuggestion = document.getElementById(this.id + "autocomplete-list");
-    if (currSuggestion) {
-      currSuggestion = currSuggestion.getElementsByTagName("div");
-    }
-    if (e.keyCode == 40) {
-      /*If the arrow DOWN key is pressed,
-      increase the currentFocus variable:*/
-      currentFocus++;
-      /*and and make the current item more visible:*/
-      addActive(currSuggestion);
-    } else if (e.keyCode == 38) { //up
-      /*If the arrow UP key is pressed,
-      decrease the currentFocus variable:*/
-      currentFocus--;
-      /*and and make the current item more visible:*/
-      addActive(currSuggestion);
-    } else if (e.keyCode == 13) {
-      /*If the ENTER key is pressed, prevent the form from being submitted,*/
-      e.preventDefault();
-      if (currentFocus > -1) {
-        /*and simulate a click on the "active" item:*/
-        if (currSuggestion) {
-          currSuggestion[currentFocus].click();
-        }
-      }
-    }
-  });
-
-  function addActive(item) {
-    /*a function to classify an item as "active":*/
-    if (!item) {
-      return false;
-    }
-    /*start by removing the "active" class on all items:*/
-    removeActive(item);
-    if (currentFocus >= item.length) {
-      currentFocus = 0;
-    }
-    if (currentFocus < 0) {
-      currentFocus = (item.length - 1);
-    }
-    /*add class "autocomplete-active":*/
-    item[currentFocus].classList.add("autocomplete-active");
-  }
-
-  function removeActive(item) {
-    /*a function to remove the "active" class from all autocomplete items:*/
-    for (var i = 0; i < item.length; i++) {
-      item[i].classList.remove("autocomplete-active");
-    }
-  }
-
-  function closeAllLists(elmnt) {
-    /*close all autocomplete lists in the document,
-    except the one passed as an argument:*/
-    var x = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < x.length; i++) {
-      if (elmnt != x[i] && elmnt != input) {
-        x[i].parentNode.removeChild(x[i]);
-      }
-    }
-  }
-  /*execute a function when someone clicks in the document:*/
-  document.addEventListener("click", function(e) {
-    closeAllLists(e.target);
-  });
-}
-
 // initialize the timeslider
 function initializeTimeSlider() {
   var mySlider = timeslider(1896, 2016);
@@ -507,7 +366,6 @@ function initializeTimeSlider() {
 }
 
 // update the chart elements based on the timeslider
-
 // update the elements
 function updateTimeSlider(range) {
   startYear = range[0];
@@ -566,6 +424,6 @@ d3.csv(csvFile).then(function(data) {
   initializeOlympicAmountSlider();
   // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
-  autocomplete(document.getElementById("searchbar"));
+  autocomplete(document.getElementById("searchbar"), peopleNames);
 
 });

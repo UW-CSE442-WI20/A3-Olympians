@@ -8,8 +8,7 @@ const d3 = require("d3");
 module.exports =
 function medalslider(min, max) {
     var myrange = [min, max + 1];
-    //var slidervalues = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,
-    //  15,16,17,18,19,20,21,22,23,24,25,26,27,28];
+    
     // set width and height of slider control
     var w = 400;
     var h = 300;
@@ -26,7 +25,6 @@ function medalslider(min, max) {
     const g = d3.select("#medalSlider svg")
         .append('g')
         .attr('transform', "translate(90,0)");
-    console.log("medal g", g);
 
     //draw background lines
     g.append('g').selectAll('line')
@@ -56,8 +54,7 @@ function medalslider(min, max) {
             var s = d3.event.selection;
             var svg = d3.select('svg');
             svg.node().value = s.map(d => Math.round(x.invert(d)));
-            console.log("medals svg", svg);
-            //svg.node().value = determineYear(val, slidervalues);
+            
             // update and move labels
             labelL.attr('x', s[0])
                 .text(svg.node().value[0]);
@@ -128,6 +125,6 @@ function medalslider(min, max) {
         var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
         return range
     }
-    console.log("medalslider called", min, max);
+    
     return {getRange: getRange};
 }
