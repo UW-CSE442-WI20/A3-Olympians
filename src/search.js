@@ -3,11 +3,12 @@
 // SEARCH BAR
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
+const d3 = require("d3");
 const _ = require("underscore");
 const generateAthleteChart = require("./athletechart");
 
 module.exports = 
-function autocomplete(input, peopleNames) {
+function autocomplete(input, peopleNames, entriesByName, smallsvg) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;

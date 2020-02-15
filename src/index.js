@@ -424,6 +424,6 @@ d3.csv(csvFile).then(function(data) {
   initializeOlympicAmountSlider();
   // initialize/create all the dropdowns/filters that will be shown in the view
   initializeOptions(data);
-  autocomplete(document.getElementById("searchbar"), peopleNames);
+  autocomplete(document.getElementById("searchbar"), peopleNames, entriesByName, smallsvg);
 
 });
