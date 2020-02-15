@@ -1,9 +1,8 @@
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
-// TIME RANGE SLIDER
+// MEDAL SLIDER
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
-
 const d3 = require("d3");
 
 module.exports =
@@ -24,7 +23,7 @@ function medalslider(min, max) {
         .range([0, width]);  // display space
 
     // create translated g
-    const g = d3.select("#medalSlider")
+    const g = d3.select("#medalSlider svg")
         .append('g')
         .attr('transform', "translate(90,0)");
     console.log("medal g", g);
@@ -132,24 +131,3 @@ function medalslider(min, max) {
     console.log("medalslider called", min, max);
     return {getRange: getRange};
 }
-
-//// HELPER FUNCTION
-//// Round slider value to the nearest valid Olympic year
-// function determineYear(val, slidervalues) {
-//   // get start year
-//   for (let i = 0; i < slidervalues.length; i++) {
-//     if (Math.abs(slidervalues[i] - val[0]) <= 3) {
-//       val[0] = slidervalues[i];
-//       break;
-//     }
-//   }
-//   // get end year
-//   for (let i = 0; i < slidervalues.length; i++) {
-//     if (Math.abs(slidervalues[i] - val[1]) <= 3) {
-//
-//       val[1] = slidervalues[i];
-//       break;
-//     }
-//   }
-//   return val;
-// }

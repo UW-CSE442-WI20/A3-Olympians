@@ -3,7 +3,6 @@
 // TIME RANGE SLIDER
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
-
 const d3 = require("d3");
 
 module.exports =
@@ -25,7 +24,7 @@ function timeslider(min, max) {
      .range([0, width]);  // display space
 
   // create translated g
-  const g = d3.select("#timeSlider")
+  const g = d3.select("#timeSlider svg")
     .append('g')
     .attr('transform', "translate(90,0)");
 
@@ -57,7 +56,7 @@ function timeslider(min, max) {
       .extent([[0,0], [width, height]])
       .on('brush', function() {
         var s = d3.event.selection;
-        var svg = d3.select('svg');
+        var svg = d3.select('#mainsvg svg');//d3.select('svg');
         var val = s.map(d => Math.round(x.invert(d)));
         svg.node().value = determineYear(val, slidervalues);
         console.log("time svg", svg);
@@ -126,7 +125,7 @@ function timeslider(min, max) {
     var getRange = function() {
       var range = d3.brushSelection(gBrush.node()).map(d => Math.round(x.invert(d)));
       range = determineYear(range, slidervalues);
-      return range; 
+      return range;
     }
     console.log("timeslider has been called", min, max);
     return {getRange: getRange}
