@@ -22,6 +22,6 @@
     "d3-transition": "^1.3.2",
     "font-awesome": "^4.7.0",
     "font-awesome.min.css": "^3.2.1",
-    "underscore": "^1.9.2"
+    "underscore": "^1.12.1"
   }
 }
